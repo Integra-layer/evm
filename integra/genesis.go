@@ -3,12 +3,23 @@ package integra
 import (
 	"encoding/json"
 
-	testconstants "github.com/cosmos/evm/testutil/constants"
 	erc20types "github.com/cosmos/evm/x/erc20/types"
 	feemarkettypes "github.com/cosmos/evm/x/feemarket/types"
 	evmtypes "github.com/cosmos/evm/x/vm/types"
 
 	minttypes "github.com/cosmos/cosmos-sdk/x/mint/types"
+)
+
+// Integra Network Constants
+const (
+	// BaseDenom is the base denomination for the Integra Network (atto-ILR)
+	BaseDenom = "ailr"
+	// DisplayDenom is the display denomination for the Integra Network
+	DisplayDenom = "ilr"
+	// TokenSymbol is the token symbol for the Integra Network
+	TokenSymbol = "ILR"
+	// IntegraNativePrecompile is the wrapped ILR contract address
+	IntegraNativePrecompile = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
 )
 
 // GenesisState of the blockchain is represented here as a map of raw json
@@ -22,44 +33,50 @@ type GenesisState map[string]json.RawMessage
 
 // NewEVMGenesisState returns the default genesis state for the EVM module.
 //
-// NOTE: for the example chain implementation we need to set the default EVM denomination,
+// NOTE: for the Integra Network we set the ILR denomination,
 // enable ALL precompiles, and include default preinstalls.
 func NewEVMGenesisState() *evmtypes.GenesisState {
 	evmGenState := evmtypes.DefaultGenesisState()
 	evmGenState.Params.ActiveStaticPrecompiles = evmtypes.AvailableStaticPrecompiles
 	evmGenState.Preinstalls = evmtypes.DefaultPreinstalls
+	evmGenState.Params.EvmDenom = BaseDenom
 
 	return evmGenState
 }
 
 // NewErc20GenesisState returns the default genesis state for the ERC20 module.
 //
-// NOTE: for the example chain implementation we are also adding a default token pair,
-// which is the base denomination of the chain (i.e. the WEVMOS contract).
+// NOTE: for the Integra Network we set up the native ILR token pair
+// with the wrapped ILR precompile contract.
 func NewErc20GenesisState() *erc20types.GenesisState {
 	erc20GenState := erc20types.DefaultGenesisState()
-	erc20GenState.TokenPairs = testconstants.ExampleTokenPairs
-	erc20GenState.NativePrecompiles = []string{testconstants.WEVMOSContractMainnet}
+	erc20GenState.TokenPairs = []erc20types.TokenPair{
+		{
+			Erc20Address:  IntegraNativePrecompile,
+			Denom:         BaseDenom,
+			Enabled:       true,
+			ContractOwner: erc20types.OWNER_MODULE,
+		},
+	}
+	erc20GenState.NativePrecompiles = []string{IntegraNativePrecompile}
 
 	return erc20GenState
 }
 
 // NewMintGenesisState returns the default genesis state for the mint module.
 //
-// NOTE: for the example chain implementation we are also adding a default minter.
+// NOTE: for the Integra Network we set the mint denomination to ailr.
 func NewMintGenesisState() *minttypes.GenesisState {
 	mintGenState := minttypes.DefaultGenesisState()
-
-	mintGenState.Params.MintDenom = testconstants.ExampleAttoDenom
+	mintGenState.Params.MintDenom = BaseDenom
 	return mintGenState
 }
 
 // NewFeeMarketGenesisState returns the default genesis state for the feemarket module.
 //
-// NOTE: for the example chain implementation we are disabling the base fee.
+// NOTE: for the Integra Network mainnet we enable the base fee for EIP-1559.
 func NewFeeMarketGenesisState() *feemarkettypes.GenesisState {
 	feeMarketGenState := feemarkettypes.DefaultGenesisState()
-	feeMarketGenState.Params.NoBaseFee = true
-
+	feeMarketGenState.Params.NoBaseFee = false // Enable EIP-1559 for mainnet
 	return feeMarketGenState
 }

@@ -72,7 +72,7 @@ var (
 	unsafeStartValidatorFn UnsafeStartValidatorCmdCreator
 )
 
-const TEST_DENOM = "atest"
+const TEST_DENOM = "ailr"
 
 var mnemonics = []string{
 	"copper push brief egg scan entry inform record adjust fossil boss egg comic alien upon aspect dry avoid interest fury window hint race symptom",
@@ -748,9 +748,9 @@ func startTestnet(cmd *cobra.Command, args startArgs) error {
 	return nil
 }
 
-// NewTestNetworkFixture returns a new evmd AppConstructor for network simulation tests
+// NewTestNetworkFixture returns a new integra AppConstructor for network simulation tests
 func NewTestNetworkFixture() sdknetwork.TestFixture {
-	dir, err := os.MkdirTemp("", "evm")
+	dir, err := os.MkdirTemp("", "integra")
 	if err != nil {
 		panic(fmt.Sprintf("failed creating temporary directory: %v", err))
 	}

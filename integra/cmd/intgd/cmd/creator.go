@@ -12,7 +12,7 @@ import (
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	simtestutil "github.com/cosmos/cosmos-sdk/testutil/sims"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-	"github.com/integra/integra"
+	"github.com/cosmos/evm/evmd"
 	"github.com/spf13/cast"
 	"github.com/spf13/viper"
 
@@ -87,7 +87,7 @@ func (a appCreator) newApp(
 		baseapp.SetIAVLCacheSize(cast.ToInt(appOpts.Get(server.FlagIAVLCacheSize))),
 	}
 
-	return integra.NewExampleApp(
+	return evmd.NewExampleApp(
 		logger,
 		db,
 		traceStore,
@@ -107,7 +107,7 @@ func (a appCreator) appExport(
 	appOpts servertypes.AppOptions,
 	modulesToExport []string,
 ) (servertypes.ExportedApp, error) {
-	var evmApp *integra.EVMD
+	var evmApp *evmd.EVMD
 
 	homePath, ok := appOpts.Get(flags.FlagHome).(string)
 	if !ok || homePath == "" {
@@ -128,7 +128,7 @@ func (a appCreator) appExport(
 		loadLatest = true
 	}
 
-	evmApp = integra.NewExampleApp(
+	evmApp = evmd.NewExampleApp(
 		logger,
 		db,
 		traceStore,

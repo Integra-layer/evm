@@ -1,5 +1,9 @@
 package integra
 
+// Integra Network EVM App
+// Chain ID: integra-1
+// Token: ILR (ailr base denom)
+
 import (
 	"encoding/json"
 	"errors"
@@ -136,7 +140,7 @@ func init() {
 	defaultNodeHome = evmconfig.MustGetDefaultNodeHome()
 }
 
-const appName = "evmd"
+const appName = "intgd"
 
 // defaultNodeHome default home directories for the application daemon
 var defaultNodeHome string

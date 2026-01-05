@@ -1,0 +1,48 @@
+[Unit]
+Description=Integra Network Node
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=root
+Group=root
+Type=simple
+
+# Working directory
+WorkingDirectory=/root
+
+# Environment variables
+Environment="HOME=/root"
+
+# Start command
+ExecStart=/usr/local/bin/intgd start \
+    --home /root/.intgd \
+    --chain-id integra-1 \
+    --minimum-gas-prices 0.000001ailr \
+    --json-rpc.api eth,txpool,personal,net,debug,web3 \
+    --json-rpc.enable true \
+    --json-rpc.address 0.0.0.0:8545 \
+    --json-rpc.ws-address 0.0.0.0:8546 \
+    --api.enable true \
+    --grpc.enable true \
+    --log_level info
+
+# Restart policy
+Restart=always
+RestartSec=3
+
+# Resource limits
+LimitNOFILE=65535
+LimitNPROC=65535
+
+# Security
+NoNewPrivileges=true
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=intgd
+
+[Install]
+WantedBy=multi-user.target
+

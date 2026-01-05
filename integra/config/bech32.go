@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	// Bech32Prefix defines the Bech32 prefix used for accounts on the Integra blockchain.
+	// Bech32Prefix defines the Bech32 prefix used for accounts on the Integra Network.
 	Bech32Prefix = "integra"
 	// Bech32PrefixAccAddr defines the Bech32 prefix of an account's address.
 	Bech32PrefixAccAddr = Bech32Prefix

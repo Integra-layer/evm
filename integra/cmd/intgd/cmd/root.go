@@ -87,7 +87,7 @@ func NewRootCmd() *cobra.Command {
 
 	rootCmd := &cobra.Command{
 		Use:   "intgd",
-		Short: "Integra Chain - Cosmos EVM",
+		Short: "Integra Network - EVM Compatible Blockchain",
 		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
 			// set the default command outputs
 			cmd.SetOut(cmd.OutOrStdout())

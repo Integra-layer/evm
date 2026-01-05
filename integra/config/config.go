@@ -7,7 +7,7 @@ import (
 )
 
 func MustGetDefaultNodeHome() string {
-	defaultNodeHome, err := clienthelpers.GetNodeHomeDirectory(".integra")
+	defaultNodeHome, err := clienthelpers.GetNodeHomeDirectory(".intgd")
 	if err != nil {
 		panic(err)
 	}
