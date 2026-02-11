@@ -324,7 +324,7 @@ func initTestnetFiles(
 	appConfig.Telemetry.EnableHostnameLabel = false
 	appConfig.Telemetry.GlobalLabels = [][]string{{"chain_id", args.chainID}}
 	evm := cosmosevmserverconfig.DefaultEVMConfig()
-	evm.EVMChainID = evmtypes.DefaultEVMChainID
+	evm.EVMChainID = config.IntegraEVMChainID
 	evmCfg := config.EVMAppConfig{
 		Config:  *appConfig,
 		EVM:     *evm,
