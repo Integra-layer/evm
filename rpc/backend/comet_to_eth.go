@@ -275,6 +275,13 @@ func (b *Backend) ReceiptsFromCometBlock(
 			return nil, fmt.Errorf("tx not found: hash=%s, error=%s", ethMsg.Hash(), err.Error())
 		}
 
+		// Resolve unindexed eth tx index: -1 is a sentinel meaning "not yet determined".
+		// Without this check, int32(-1) cast to uint wraps to max uint64 (18446744073709551615),
+		// which breaks viem/wagmi clients with IntegerOutOfRangeError.
+		if txResult.EthTxIndex == -1 {
+			txResult.EthTxIndex = int32(i) // #nosec G115 -- i is bounded by len(msgs)
+		}
+
 		cumulatedGasUsed += txResult.GasUsed
 
 		var effectiveGasPrice *big.Int
