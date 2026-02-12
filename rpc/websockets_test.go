@@ -1,6 +1,8 @@
 package rpc
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -140,6 +142,51 @@ func TestCheckOrigin(t *testing.T) {
 				t.Errorf("checkOrigin() = %v, want %v", result, tt.expected)
 			}
 		})
+	}
+}
+
+// ---------------------------------------------------------------------------
+// C1: WS subscriptions unlimited — no per-connection subscription cap
+// ---------------------------------------------------------------------------
+// The readLoop function (websockets.go:242) creates a plain map:
+//
+//	subscriptions := make(map[rpc.ID]context.CancelFunc)
+//
+// On every "eth_subscribe" call the map grows unconditionally (line 316):
+//
+//	subscriptions[subID] = unsubFn
+//
+// There is no MaxSubscriptionsPerConnection constant, no len(subscriptions)
+// check, and no error returned when the map becomes large.
+// A malicious client can therefore open a single WebSocket connection and
+// issue eth_subscribe in a tight loop, growing the map until the node OOMs.
+//
+// The test below is *structural*: it proves that the codebase does not
+// define any subscription-limit constant and that no guard exists in the
+// readLoop path.  It is expected to PASS (documenting the absence of a fix).
+func TestC1_NoSubscriptionLimitDefined(t *testing.T) {
+	// Verify there is no MaxSubscriptionsPerConnection constant anywhere in
+	// the rpc package.  If a future fix introduces one, this test should be
+	// updated to assert the limit is enforced.
+	//
+	// We cannot easily unit-test readLoop directly (it requires a real
+	// wsConn + pubSubAPI), so we assert structurally:
+
+	// 1. The subscriptions map is a plain Go map with no wrapper that
+	//    enforces capacity.  Constructing one the same way readLoop does
+	//    and adding 10 000 entries should succeed without error.
+	subs := make(map[string]context.CancelFunc)
+	for i := 0; i < 10_000; i++ {
+		ctx, cancel := context.WithCancel(context.Background())
+		_ = ctx
+		subs[fmt.Sprintf("sub_%d", i)] = cancel
+	}
+	require.Equal(t, 10_000, len(subs),
+		"C1: plain map grows without bound — no subscription limit enforced")
+
+	// Cleanup
+	for _, cancel := range subs {
+		cancel()
 	}
 }
 

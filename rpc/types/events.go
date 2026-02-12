@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -239,11 +240,14 @@ func fillTxAttribute(tx *ParsedTx, key string, value string) error {
 	case evmtypes.AttributeKeyEthereumTxHash:
 		tx.Hash = common.HexToHash(value)
 	case evmtypes.AttributeKeyTxIndex:
-		txIndex, err := strconv.ParseUint(value, 10, 31) // #nosec G115
+		txIndex, err := strconv.ParseUint(value, 10, 64)
 		if err != nil {
 			return err
 		}
-		tx.EthTxIndex = int32(txIndex) // #nosec G115
+		if txIndex > uint64(math.MaxInt32) {
+			return fmt.Errorf("tx index %d exceeds max int32", txIndex)
+		}
+		tx.EthTxIndex = int32(txIndex)
 	case evmtypes.AttributeKeyTxGasUsed:
 		gasUsed, err := strconv.ParseUint(value, 10, 64)
 		if err != nil {

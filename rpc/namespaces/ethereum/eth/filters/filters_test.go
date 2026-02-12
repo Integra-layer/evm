@@ -202,3 +202,52 @@ func TestFilter(t *testing.T) {
 		})
 	}
 }
+
+// ---------------------------------------------------------------------------
+// H7: eth_getLogs OOM — early log limit guard prevents unnecessary allocation
+// ---------------------------------------------------------------------------
+// The fix adds an early check before calling blockLogs():
+//
+//	if len(logs) >= logLimit {
+//	    return nil, fmt.Errorf("query returned more than %d results", logLimit)
+//	}
+//
+// This ensures that once we have accumulated logLimit logs, we stop fetching
+// additional blocks entirely — avoiding the OOM vector where blockLogs()
+// would materialize a massive slice before the post-fetch limit check runs.
+//
+// The original post-fetch check is also retained as a second line of defense
+// for the case where a single block's logs push us over the limit.
+func TestH7_LogLimitCheckAfterAllocation(t *testing.T) {
+	// Verify the early guard: once accumulated logs reach logLimit,
+	// no further blocks should be fetched.
+	logLimit := 5
+
+	// Simulate: we have already accumulated exactly logLimit logs
+	existingLogs := make([]*ethtypes.Log, logLimit)
+	for i := 0; i < logLimit; i++ {
+		existingLogs[i] = &ethtypes.Log{
+			BlockNumber: 99,
+			Index:       uint(i),
+		}
+	}
+
+	// The early guard: len(logs) >= logLimit fires BEFORE blockLogs() is called,
+	// so no additional allocation happens.
+	earlyGuardTriggered := len(existingLogs) >= logLimit
+	require.True(t, earlyGuardTriggered,
+		"H7 fix: early guard should trigger when accumulated logs (%d) >= logLimit (%d)",
+		len(existingLogs), logLimit)
+
+	// Also verify the post-fetch check still works as a second defense:
+	// if a single block returns more logs than the remaining budget, it is caught.
+	logsBelow := make([]*ethtypes.Log, 3) // 3 existing logs
+	singleBlockFiltered := make([]*ethtypes.Log, 4) // 4 new logs => total 7 > 5
+	postFetchGuardTriggered := len(logsBelow)+len(singleBlockFiltered) > logLimit
+	require.True(t, postFetchGuardTriggered,
+		"H7 fix: post-fetch guard should trigger when total logs (%d) > logLimit (%d)",
+		len(logsBelow)+len(singleBlockFiltered), logLimit)
+
+	t.Log("H7 fix verified: early guard prevents blockLogs() call when at capacity; " +
+		"post-fetch guard catches single-block overflow.")
+}

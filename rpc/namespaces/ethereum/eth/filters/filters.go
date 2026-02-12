@@ -191,6 +191,11 @@ func (f *Filter) Logs(ctx context.Context, logLimit int, blockLimit int64) (logs
 			return nil, fmt.Errorf("failed to query block bloom filter from block results: %w", err)
 		}
 
+		// check logs limit before fetching more
+		if len(logs) >= logLimit {
+			return nil, fmt.Errorf("query returned more than %d results", logLimit)
+		}
+
 		filtered, err := f.blockLogs(blockRes, bloom)
 		if err != nil {
 			return nil, fmt.Errorf("failed to fetch block by number %d: %w", height, err)
