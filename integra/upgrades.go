@@ -2,6 +2,7 @@ package integra
 
 import (
 	"context"
+	"os"
 
 	"github.com/cosmos/evm/x/vm/types"
 
@@ -70,8 +71,14 @@ func (app EVMD) RegisterUpgradeHandlers() {
 		},
 	)
 
+	// Skip reading upgrade info if home directory doesn't exist yet (during CLI init)
 	upgradeInfo, err := app.UpgradeKeeper.ReadUpgradeInfoFromDisk()
 	if err != nil {
+		// If the error is because the data directory doesn't exist, just skip
+		// This happens when the app is initialized for CLI purposes before `init` is run
+		if os.IsNotExist(err) {
+			return
+		}
 		panic(err)
 	}
 

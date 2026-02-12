@@ -17,11 +17,38 @@
 coverage.txt
 yarn.lock
 
-# IDE
+# IDE & AI Agent Configs
 .idea/
 .vscode/
+.cursor/
+.claude/
+.agents/
+.agent/
+.adal/
+.augment/
+.cline/
+.codebuddy/
+.commandcode/
+.continue/
+.crush/
+.factory/
+.goose/
+.iflow/
 *.iml
 *.code-workspace
+
+# Secrets & Keys
+.env
+.env.*
+*.json.key
+*-wallet.json
+.faucet-*
+
+# Large genesis state exports (use deployment/testnet/genesis.json for template)
+genesis_integralayer*.json
+deployment/mainnet/genesis*.json
+!deployment/mainnet/genesis.json
+!deployment/testnet/genesis.json
 
 # Node.js
 **/node_modules
