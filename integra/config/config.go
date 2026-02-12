@@ -6,6 +6,11 @@ import (
 	cosmosevmserverconfig "github.com/cosmos/evm/server/config"
 )
 
+const (
+	// IntegraEVMChainID is the EIP-155 chain ID for Integra mainnet.
+	IntegraEVMChainID uint64 = 26217
+)
+
 func MustGetDefaultNodeHome() string {
 	defaultNodeHome, err := clienthelpers.GetNodeHomeDirectory(".intgd")
 	if err != nil {

@@ -128,7 +128,7 @@ func NewRootCmd() *cobra.Command {
 				return err
 			}
 
-			customAppTemplate, customAppConfig := config.InitAppConfig(types.DefaultEVMExtendedDenom, types.DefaultEVMChainID) // TODO:VLAD - Remove this
+			customAppTemplate, customAppConfig := config.InitAppConfig(types.DefaultEVMExtendedDenom, config.IntegraEVMChainID)
 			customTMConfig := initCometConfig()
 
 			return sdkserver.InterceptConfigsPreRunHandler(cmd, customAppTemplate, customAppConfig, customTMConfig)
