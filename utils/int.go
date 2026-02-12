@@ -53,3 +53,11 @@ func SafeHexToInt64(value hexutil.Uint64) (int64, error) {
 
 	return int64(value), nil //nolint:gosec // checked
 }
+
+// SafeInt32ToUint checks for underflows while casting an int32 to uint value.
+func SafeInt32ToUint(value int32) (uint, error) {
+	if value < 0 {
+		return 0, fmt.Errorf("invalid int32 value for uint conversion: %d", value)
+	}
+	return uint(value), nil
+}

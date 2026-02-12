@@ -188,3 +188,17 @@ func TestParseTxResult(t *testing.T) {
 		})
 	}
 }
+
+func TestParseTxResult_NegativeGasUsed(t *testing.T) {
+	// The check at events.go:125-127 rejects negative GasUsed before the
+	// len(p.Txs)==1 fallback, even when there are 0 parsed txs.
+	result := &abci.ExecTxResult{
+		Code:    0,
+		GasUsed: -1,
+		Events:  []abci.Event{},
+	}
+	_, err := ParseTxResult(result, nil)
+	require.Error(t, err, "ParseTxResult should reject negative GasUsed")
+	require.Contains(t, err.Error(), "negative gas used",
+		"error message should mention negative gas used")
+}

@@ -165,7 +165,7 @@ func (b *Backend) EthBlockFromCometBlock(
 	// 2. get miner
 	miner, err := b.MinerFromCometBlock(ctx, resBlock)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get miner(block proposer) address from comet block")
+		return nil, fmt.Errorf("failed to get miner(block proposer) address from comet block: %w", err)
 	}
 
 	// 3. get block gasLimit
@@ -206,7 +206,11 @@ func (b *Backend) EthBlockFromCometBlock(
 			// block gas limit has exceeded, other txs must have failed with same reason.
 			break
 		}
-		gasUsed += uint64(txsResult.GetGasUsed()) // #nosec G115 -- checked for int overflow already
+		gu := txsResult.GetGasUsed()
+		if gu < 0 {
+			return nil, fmt.Errorf("negative gas used in tx result at height %d", cmtBlock.Height)
+		}
+		gasUsed += uint64(gu)
 	}
 	ethHeader.GasUsed = gasUsed
 
@@ -289,6 +293,9 @@ func (b *Backend) ReceiptsFromCometBlock(
 			effectiveGasPrice = rpctypes.EffectiveGasPrice(ethMsg.Raw.Transaction, baseFee)
 		} else {
 			effectiveGasPrice = ethMsg.Raw.GasFeeCap()
+		}
+		if effectiveGasPrice == nil {
+			effectiveGasPrice = big.NewInt(0)
 		}
 
 		var status uint64

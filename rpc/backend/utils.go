@@ -157,11 +157,10 @@ func (b *Backend) ProcessBlock(
 		return fmt.Errorf("invalid gas limit type: %T", (*ethBlock)["gasLimit"])
 	}
 
-	gasUsedBig, ok := (*ethBlock)["gasUsed"].(*hexutil.Big)
+	gasUsedUint64, ok := (*ethBlock)["gasUsed"].(hexutil.Uint64)
 	if !ok {
 		return fmt.Errorf("invalid gas used type: %T", (*ethBlock)["gasUsed"])
 	}
-	gasUsedInt := gasUsedBig.ToInt()
 
 	timestampHex, ok := (*ethBlock)["timestamp"].(hexutil.Uint64)
 	if !ok {
@@ -171,7 +170,7 @@ func (b *Backend) ProcessBlock(
 	header := ethtypes.Header{
 		Number:   new(big.Int).SetInt64(blockHeight),
 		GasLimit: uint64(gasLimitUint64),
-		GasUsed:  gasUsedInt.Uint64(),
+		GasUsed:  uint64(gasUsedUint64),
 		Time:     uint64(timestampHex),
 	}
 	if baseFee, ok := (*ethBlock)["baseFeePerGas"].(*hexutil.Big); ok && baseFee != nil {
@@ -227,8 +226,7 @@ func (b *Backend) ProcessBlock(
 		return fmt.Errorf("gasLimit of block height %d should be bigger than 0 , current gaslimit %d", blockHeight, gasLimitUint64)
 	}
 
-	gasUsedUint64 := gasUsedInt.Uint64()
-	targetOneFeeHistory.GasUsedRatio = safeRatio(gasUsedUint64, uint64(gasLimitUint64))
+	targetOneFeeHistory.GasUsedRatio = safeRatio(uint64(gasUsedUint64), uint64(gasLimitUint64))
 	blockGasUsed := float64(gasUsedUint64)
 
 	rewardCount := len(rewardPercentiles)
@@ -253,7 +251,11 @@ func (b *Backend) ProcessBlock(
 			b.Logger.Debug("failed to decode transaction in block", "height", blockHeight, "error", err.Error())
 			continue
 		}
-		txGasUsed := uint64(cometTxResult.GasUsed) // #nosec G115
+		if cometTxResult.GasUsed < 0 {
+			b.Logger.Debug("negative gas used in tx result", "height", blockHeight, "txIndex", i)
+			continue
+		}
+		txGasUsed := uint64(cometTxResult.GasUsed)
 		for _, msg := range tx.GetMsgs() {
 			ethMsg, ok := msg.(*evmtypes.MsgEthereumTx)
 			if !ok {

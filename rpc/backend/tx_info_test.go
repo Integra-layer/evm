@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"math/big"
+	"os"
 	"path/filepath"
 	"testing"
 	"time"
@@ -26,6 +27,7 @@ import (
 	servertypes "github.com/cosmos/evm/server/types"
 	"github.com/cosmos/evm/testutil/constants"
 	utiltx "github.com/cosmos/evm/testutil/tx"
+	feemarkettypes "github.com/cosmos/evm/x/feemarket/types"
 	evmtypes "github.com/cosmos/evm/x/vm/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -34,6 +36,23 @@ import (
 	"github.com/cosmos/cosmos-sdk/server"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
+
+func TestMain(m *testing.M) {
+	chainID := constants.ExampleChainID.EVMChainID
+	configurator := evmtypes.NewEVMConfigurator()
+	configurator.ResetTestConfig()
+	if err := evmtypes.SetChainConfig(evmtypes.DefaultChainConfig(chainID)); err != nil {
+		panic(err)
+	}
+	err := configurator.
+		WithExtendedEips(evmtypes.DefaultCosmosEVMActivators).
+		WithEVMCoinInfo(constants.ChainsCoinInfo[chainID]).
+		Configure()
+	if err != nil {
+		panic(err)
+	}
+	os.Exit(m.Run())
+}
 
 func setupMockBackend(t *testing.T) *Backend {
 	t.Helper()
@@ -443,6 +462,251 @@ func (m *MockIndexer) GetByTxHash(hash common.Hash) (*servertypes.TxResult, erro
 
 func (m *MockIndexer) GetByBlockAndIndex(blockNumber int64, txIndex int32) (*servertypes.TxResult, error) {
 	return nil, nil
+}
+
+// Note: A3 (EthTxIndex=-1 in GetTransactionByHash) is already guarded at tx_info.go:82
+// and covered by TestReceiptsFromCometBlock_SentinelEthTxIndex as a regression test.
+
+func TestEthBlockFromCometBlock_NegativeGasUsed(t *testing.T) {
+	backend := setupMockBackend(t)
+	height := int64(50)
+
+	resBlock := &tmrpctypes.ResultBlock{
+		Block: &tmtypes.Block{
+			Header: tmtypes.Header{
+				Height:          height,
+				ProposerAddress: []byte{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20},
+			},
+			Data: tmtypes.Data{Txs: []tmtypes.Tx{}}, // no txs in block
+		},
+	}
+
+	blockRes := &tmrpctypes.ResultBlockResults{
+		Height: height,
+		TxsResults: []*abcitypes.ExecTxResult{
+			{Code: 0, GasUsed: -1}, // negative gas
+		},
+	}
+
+	// Mock BaseFee (EVMQueryClient.BaseFee)
+	mockEVMQueryClient := backend.QueryClient.QueryClient.(*mocks.EVMQueryClient)
+	mockEVMQueryClient.On("BaseFee", mock.Anything, mock.Anything, mock.Anything).Return(
+		&evmtypes.QueryBaseFeeResponse{BaseFee: nil}, nil,
+	).Maybe()
+
+	// Mock ValidatorAccount for MinerFromCometBlock
+	mockEVMQueryClient.On("ValidatorAccount", mock.Anything, mock.Anything, mock.Anything).Return(
+		&evmtypes.QueryValidatorAccountResponse{
+			AccountAddress: sdk.AccAddress(common.Address{}.Bytes()).String(),
+		}, nil,
+	).Maybe()
+
+	// Mock ConsensusParams for BlockMaxGasFromConsensusParams
+	mockClient := backend.ClientCtx.Client.(*mocks.Client)
+	mockClient.On("ConsensusParams", mock.Anything, mock.Anything).Return(
+		&tmrpctypes.ResultConsensusParams{
+			ConsensusParams: tmtypes.ConsensusParams{
+				Block: tmtypes.BlockParams{MaxGas: -1},
+			},
+		}, nil,
+	).Maybe()
+
+	// Mock Indexer so ReceiptsFromCometBlock does not fail
+	backend.Indexer = &MockIndexer{txResults: map[common.Hash]*servertypes.TxResult{}}
+
+	ctx := rpctypes.NewContextWithHeight(height)
+	_, err := backend.EthBlockFromCometBlock(ctx, resBlock, blockRes)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "negative gas used")
+}
+
+func TestProcessBlock_GasUsedType(t *testing.T) {
+	backend := setupMockBackend(t)
+	height := int64(50)
+
+	cometBlock := &tmrpctypes.ResultBlock{
+		Block: &tmtypes.Block{
+			Header: tmtypes.Header{Height: height},
+			Data:   tmtypes.Data{Txs: []tmtypes.Tx{}},
+		},
+	}
+
+	cometBlockResult := &tmrpctypes.ResultBlockResults{
+		Height:     height,
+		TxsResults: []*abcitypes.ExecTxResult{},
+	}
+
+	// Mock BaseFee (EVMQueryClient)
+	mockEVMQueryClient := backend.QueryClient.QueryClient.(*mocks.EVMQueryClient)
+	mockEVMQueryClient.On("BaseFee", mock.Anything, mock.Anything, mock.Anything).Return(
+		&evmtypes.QueryBaseFeeResponse{BaseFee: nil}, nil,
+	).Maybe()
+
+	// Mock FeeMarket Params for IsLondon path
+	mockFeeMarketQueryClient := backend.QueryClient.FeeMarket.(*mocks.FeeMarketQueryClient)
+	mockFeeMarketQueryClient.On("Params", mock.Anything, mock.Anything, mock.Anything).Return(
+		&feemarkettypes.QueryParamsResponse{Params: feemarkettypes.DefaultParams()}, nil,
+	).Maybe()
+
+	t.Run("correct gasUsed type hexutil.Uint64", func(t *testing.T) {
+		ethBlock := map[string]interface{}{
+			"gasLimit":       hexutil.Uint64(1000000),
+			"gasUsed":        hexutil.Uint64(21000),
+			"timestamp":      hexutil.Uint64(1000),
+			"baseFeePerGas":  (*hexutil.Big)(big.NewInt(1)),
+		}
+		oneFeeHistory := rpctypes.OneFeeHistory{}
+		err := backend.ProcessBlock(
+			rpctypes.NewContextWithHeight(height),
+			cometBlock, &ethBlock, []float64{25, 50, 75},
+			cometBlockResult, &oneFeeHistory,
+		)
+		// Should not fail on gasUsed type assertion.
+		// It may return nil (no txs) or succeed fully.
+		if err != nil {
+			require.NotContains(t, err.Error(), "invalid gas used type",
+				"correct hexutil.Uint64 type should not cause a type assertion error")
+		}
+	})
+
+	t.Run("wrong gasUsed type returns error", func(t *testing.T) {
+		ethBlock := map[string]interface{}{
+			"gasLimit":      hexutil.Uint64(1000000),
+			"gasUsed":       (*hexutil.Big)(big.NewInt(21000)), // wrong type
+			"timestamp":     hexutil.Uint64(1000),
+			"baseFeePerGas": (*hexutil.Big)(big.NewInt(1)),
+		}
+		oneFeeHistory := rpctypes.OneFeeHistory{}
+		err := backend.ProcessBlock(
+			rpctypes.NewContextWithHeight(height),
+			cometBlock, &ethBlock, []float64{},
+			cometBlockResult, &oneFeeHistory,
+		)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "invalid gas used type")
+	})
+}
+
+func TestGetTransactionReceipt_ContextCancellation(t *testing.T) {
+	// D1: time.Sleep(delay) in retry loop ignores context cancellation
+	backend := setupMockBackend(t)
+	txHash := common.HexToHash("0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef")
+
+	// Create a context that is already cancelled
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+
+	start := time.Now()
+	_, err := backend.GetTransactionReceipt(ctx, txHash)
+	elapsed := time.Since(start)
+
+	// With a cancelled context, the function should return promptly
+	// The retry loop has 10 retries with exponential backoff (50ms, 100ms, 200ms...)
+	// Total sleep time without context check: ~51 seconds
+	// With context check: should return almost immediately
+	require.Less(t, elapsed, 2*time.Second,
+		"GetTransactionReceipt should respect context cancellation and return promptly")
+	_ = err // may be nil (tx not found returns nil,nil) or ctx.Err()
+}
+
+func TestReceiptsFromCometBlock_NilEffectiveGasPrice(t *testing.T) {
+	// B5: GasFeeCap() can return nil for legacy txs -> receipt field becomes nil
+	backend := setupMockBackend(t)
+	height := int64(100)
+	resBlock := &tmrpctypes.ResultBlock{
+		Block: &tmtypes.Block{
+			Header: tmtypes.Header{
+				Height: height,
+			},
+		},
+	}
+
+	anyData := codectypes.UnsafePackAny(&evmtypes.MsgEthereumTxResponse{Hash: "hash"})
+	txMsgData := &sdk.TxMsgData{MsgResponses: []*codectypes.Any{anyData}}
+	encodingConfig := encoding.MakeConfig(constants.ExampleChainID.EVMChainID)
+	encodedData, err := encodingConfig.Codec.Marshal(txMsgData)
+	require.NoError(t, err)
+
+	blockRes := &tmrpctypes.ResultBlockResults{
+		Height:     height,
+		TxsResults: []*abcitypes.ExecTxResult{{Code: 0, Data: encodedData}},
+	}
+
+	msgs := []*evmtypes.MsgEthereumTx{buildMsgEthereumTx(t)}
+	mockIndexer := &MockIndexer{
+		txResults: map[common.Hash]*servertypes.TxResult{
+			msgs[0].Hash(): {
+				Height:     height,
+				TxIndex:    0,
+				EthTxIndex: 0,
+				MsgIndex:   0,
+			},
+		},
+	}
+	backend.Indexer = mockIndexer
+
+	// Mock BaseFee to return nil (simulating no EIP-1559)
+	mockEVMQueryClient := backend.QueryClient.QueryClient.(*mocks.EVMQueryClient)
+	mockEVMQueryClient.On("BaseFee", mock.Anything, mock.Anything).Return(
+		&evmtypes.QueryBaseFeeResponse{BaseFee: nil}, nil,
+	).Maybe()
+
+	receipts, err := backend.ReceiptsFromCometBlock(rpctypes.NewContextWithHeight(1), resBlock, blockRes, msgs)
+	require.NoError(t, err)
+	require.Len(t, receipts, 1)
+
+	// B5: effectiveGasPrice should never be nil
+	require.NotNil(t, receipts[0].EffectiveGasPrice,
+		"effectiveGasPrice should not be nil even when baseFee is nil")
+}
+
+func TestReceiptsFromCometBlock_SentinelEthTxIndex(t *testing.T) {
+	// A2 regression: EthTxIndex = -1 should be resolved, not cast to MaxUint64
+	backend := setupMockBackend(t)
+	height := int64(100)
+	resBlock := &tmrpctypes.ResultBlock{
+		Block: &tmtypes.Block{
+			Header: tmtypes.Header{Height: height},
+		},
+	}
+	resBlock.BlockID.Hash = []byte{0x01, 0x02, 0x03}
+
+	anyData := codectypes.UnsafePackAny(&evmtypes.MsgEthereumTxResponse{Hash: "hash"})
+	txMsgData := &sdk.TxMsgData{MsgResponses: []*codectypes.Any{anyData}}
+	encodingConfig := encoding.MakeConfig(constants.ExampleChainID.EVMChainID)
+	encodedData, err := encodingConfig.Codec.Marshal(txMsgData)
+	require.NoError(t, err)
+
+	blockRes := &tmrpctypes.ResultBlockResults{
+		Height:     height,
+		TxsResults: []*abcitypes.ExecTxResult{{Code: 0, Data: encodedData}},
+	}
+
+	msgs := []*evmtypes.MsgEthereumTx{buildMsgEthereumTx(t)}
+	mockIndexer := &MockIndexer{
+		txResults: map[common.Hash]*servertypes.TxResult{
+			msgs[0].Hash(): {
+				Height:     height,
+				TxIndex:    0,
+				EthTxIndex: -1, // sentinel value
+				MsgIndex:   0,
+			},
+		},
+	}
+	backend.Indexer = mockIndexer
+
+	mockEVMQueryClient := backend.QueryClient.QueryClient.(*mocks.EVMQueryClient)
+	mockEVMQueryClient.On("BaseFee", mock.Anything, mock.Anything).Return(
+		&evmtypes.QueryBaseFeeResponse{}, nil,
+	).Maybe()
+
+	receipts, err := backend.ReceiptsFromCometBlock(rpctypes.NewContextWithHeight(1), resBlock, blockRes, msgs)
+	require.NoError(t, err)
+	require.Len(t, receipts, 1)
+
+	// The receipt's TransactionIndex should be 0 (resolved from position), not MaxUint
+	require.Equal(t, uint(0), receipts[0].TransactionIndex,
+		"sentinel EthTxIndex=-1 should resolve to actual position (0), not wrap to MaxUint")
 }
 
 func TestReceiptsFromCometBlock(t *testing.T) {

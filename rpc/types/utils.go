@@ -108,7 +108,7 @@ func BlockMaxGasFromConsensusParams(goCtx context.Context, clientCtx client.Cont
 
 	cmtrpcclient, ok := clientCtx.Client.(cmtrpcclient.Client)
 	if !ok {
-		panic("incorrect tm rpc client")
+		return 0, fmt.Errorf("incorrect tm rpc client")
 	}
 	resConsParams, err := cmtrpcclient.ConsensusParams(goCtx, &blockHeight)
 	defaultGasLimit := int64(^uint32(0)) // #nosec G115
@@ -404,7 +404,7 @@ func RPCMarshalHeader(head *ethtypes.Header, blockHash []byte) map[string]interf
 		"difficulty":       (*hexutil.Big)(head.Difficulty),
 		"extraData":        hexutil.Bytes(head.Extra),
 		"gasLimit":         hexutil.Uint64(head.GasLimit),
-		"gasUsed":          (*hexutil.Big)(big.NewInt(int64(head.GasUsed))), //nolint:gosec // G115
+		"gasUsed":          hexutil.Uint64(head.GasUsed),
 		"timestamp":        hexutil.Uint64(head.Time),
 		"transactionsRoot": head.TxHash,
 		"receiptsRoot":     head.ReceiptHash,
@@ -427,6 +427,8 @@ func RPCMarshalHeader(head *ethtypes.Header, blockHash []byte) map[string]interf
 	if head.RequestsHash != nil {
 		result["requestsHash"] = head.RequestsHash
 	}
+	// totalDifficulty is always 0 for PoS chains (required by geth compatibility)
+	result["totalDifficulty"] = (*hexutil.Big)(big.NewInt(0))
 	return result
 }
 
