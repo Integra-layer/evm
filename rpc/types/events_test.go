@@ -188,3 +188,68 @@ func TestParseTxResult(t *testing.T) {
 		})
 	}
 }
+
+func TestParseTxResult_NegativeGasUsed(t *testing.T) {
+	// The check at events.go:125-127 rejects negative GasUsed before the
+	// len(p.Txs)==1 fallback, even when there are 0 parsed txs.
+	result := &abci.ExecTxResult{
+		Code:    0,
+		GasUsed: -1,
+		Events:  []abci.Event{},
+	}
+	_, err := ParseTxResult(result, nil)
+	require.Error(t, err, "ParseTxResult should reject negative GasUsed")
+	require.Contains(t, err.Error(), "negative gas used",
+		"error message should mention negative gas used")
+}
+
+func TestFillTxAttribute_ParseUintBitSize31RejectsValidUint32(t *testing.T) {
+	// H5: RED — ParseUint bitSize=31 rejects valid uint32 values >= 2^31.
+	// At events.go:242, strconv.ParseUint(value, 10, 31) limits txIndex to
+	// 0..2^31-1 (2147483647). Values in range [2^31, 2^32-1] are valid uint32
+	// values but are rejected because bitSize=31 instead of 32.
+	// The int32 cast at line 246 would then also be incorrect for values >= 2^31,
+	// but the ParseUint rejects them first.
+
+	testCases := []struct {
+		name        string
+		value       string
+		expectErr   bool
+		errContains string
+		expectIndex int32
+	}{
+		{
+			name:        "max int32 (2^31 - 1) accepted",
+			value:       "2147483647",
+			expectErr:   false,
+			expectIndex: 2147483647,
+		},
+		{
+			name:        "2^31 exceeds max int32",
+			value:       "2147483648",
+			expectErr:   true,
+			errContains: "exceeds max int32",
+		},
+		{
+			name:        "max uint32 (2^32 - 1) exceeds max int32",
+			value:       "4294967295",
+			expectErr:   true,
+			errContains: "exceeds max int32",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tx := NewParsedTx(0)
+			err := fillTxAttribute(&tx, evmtypes.AttributeKeyTxIndex, tc.value)
+			if tc.expectErr {
+				require.Error(t, err,
+					"H5: value %s should be rejected by explicit bounds check", tc.value)
+				require.Contains(t, err.Error(), tc.errContains)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectIndex, tx.EthTxIndex)
+			}
+		})
+	}
+}

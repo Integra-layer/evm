@@ -88,15 +88,17 @@ func (s *RPCStream) initSubscriptions() {
 
 	chBlocks, err := s.evtClient.Subscribe(ctx, streamSubscriberName, blockEvents, subscribBufferSize)
 	if err != nil {
-		panic(err)
+		s.logger.Error("failed to subscribe to block events, streams will be empty", "err", err)
+		return
 	}
 
 	chLogs, err := s.evtClient.Subscribe(ctx, streamSubscriberName, evmEvents, subscribBufferSize)
 	if err != nil {
-		if err := s.evtClient.UnsubscribeAll(context.Background(), streamSubscriberName); err != nil {
-			s.logger.Error("failed to unsubscribe", "err", err)
+		if unsubErr := s.evtClient.UnsubscribeAll(context.Background(), streamSubscriberName); unsubErr != nil {
+			s.logger.Error("failed to unsubscribe", "err", unsubErr)
 		}
-		panic(err)
+		s.logger.Error("failed to subscribe to evm events, log stream will be empty", "err", err)
+		return
 	}
 
 	go s.start(&s.wg, chBlocks, chLogs)

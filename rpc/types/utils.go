@@ -70,7 +70,11 @@ func EthHeaderFromComet(header cmttypes.Header, bloom ethtypes.Bloom, baseFee *b
 		txHash = common.BytesToHash(header.DataHash)
 	}
 
-	time := uint64(header.Time.UTC().Unix()) //nolint:gosec // G115 // won't exceed uint64
+	unixTime := header.Time.UTC().Unix()
+	if unixTime < 0 {
+		unixTime = 0
+	}
+	time := uint64(unixTime)
 	return &ethtypes.Header{
 		ParentHash:  common.BytesToHash(header.LastBlockID.Hash.Bytes()),
 		UncleHash:   ethtypes.EmptyUncleHash,
@@ -108,7 +112,7 @@ func BlockMaxGasFromConsensusParams(goCtx context.Context, clientCtx client.Cont
 
 	cmtrpcclient, ok := clientCtx.Client.(cmtrpcclient.Client)
 	if !ok {
-		panic("incorrect tm rpc client")
+		return 0, fmt.Errorf("incorrect tm rpc client")
 	}
 	resConsParams, err := cmtrpcclient.ConsensusParams(goCtx, &blockHeight)
 	defaultGasLimit := int64(^uint32(0)) // #nosec G115
@@ -135,14 +139,21 @@ func MakeHeader(
 	cmtHeader cmttypes.Header, gasLimit int64,
 	validatorAddr common.Address, baseFee *big.Int,
 ) *ethtypes.Header {
+	if gasLimit < 0 {
+		gasLimit = 0
+	}
+	unixTimeMH := cmtHeader.Time.UTC().Unix()
+	if unixTimeMH < 0 {
+		unixTimeMH = 0
+	}
 	header := &ethtypes.Header{
 		Root:       common.BytesToHash(hexutil.Bytes(cmtHeader.AppHash)),
 		ParentHash: common.BytesToHash(cmtHeader.LastBlockID.Hash.Bytes()),
 		Coinbase:   validatorAddr,
 		Difficulty: big.NewInt(0),
-		GasLimit:   uint64(gasLimit), //nolint:gosec // G115 // gas limit won't exceed uint64
+		GasLimit:   uint64(gasLimit),
 		Number:     big.NewInt(cmtHeader.Height),
-		Time:       uint64(cmtHeader.Time.UTC().Unix()), //nolint:gosec // G115 // timestamp won't exceed uint64
+		Time:       uint64(unixTimeMH),
 	}
 
 	if evmtypes.GetEthChainConfig().IsLondon(header.Number) {
@@ -404,7 +415,7 @@ func RPCMarshalHeader(head *ethtypes.Header, blockHash []byte) map[string]interf
 		"difficulty":       (*hexutil.Big)(head.Difficulty),
 		"extraData":        hexutil.Bytes(head.Extra),
 		"gasLimit":         hexutil.Uint64(head.GasLimit),
-		"gasUsed":          (*hexutil.Big)(big.NewInt(int64(head.GasUsed))), //nolint:gosec // G115
+		"gasUsed":          hexutil.Uint64(head.GasUsed),
 		"timestamp":        hexutil.Uint64(head.Time),
 		"transactionsRoot": head.TxHash,
 		"receiptsRoot":     head.ReceiptHash,
@@ -427,6 +438,8 @@ func RPCMarshalHeader(head *ethtypes.Header, blockHash []byte) map[string]interf
 	if head.RequestsHash != nil {
 		result["requestsHash"] = head.RequestsHash
 	}
+	// totalDifficulty is always 0 for PoS chains (required by geth compatibility)
+	result["totalDifficulty"] = (*hexutil.Big)(big.NewInt(0))
 	return result
 }
 

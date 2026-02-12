@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -122,7 +123,10 @@ func ParseTxResult(result *abci.ExecTxResult, tx sdk.Tx) (*ParsedTxs, error) {
 	}
 
 	// some old versions miss some events, fill it with tx result
-	gasUsed := uint64(result.GasUsed) // #nosec G115
+	if result.GasUsed < 0 {
+		return nil, fmt.Errorf("negative gas used in tx result: %d", result.GasUsed)
+	}
+	gasUsed := uint64(result.GasUsed)
 	if len(p.Txs) == 1 {
 		p.Txs[0].GasUsed = gasUsed
 	}
@@ -236,11 +240,14 @@ func fillTxAttribute(tx *ParsedTx, key string, value string) error {
 	case evmtypes.AttributeKeyEthereumTxHash:
 		tx.Hash = common.HexToHash(value)
 	case evmtypes.AttributeKeyTxIndex:
-		txIndex, err := strconv.ParseUint(value, 10, 31) // #nosec G115
+		txIndex, err := strconv.ParseUint(value, 10, 64)
 		if err != nil {
 			return err
 		}
-		tx.EthTxIndex = int32(txIndex) // #nosec G115
+		if txIndex > uint64(math.MaxInt32) {
+			return fmt.Errorf("tx index %d exceeds max int32", txIndex)
+		}
+		tx.EthTxIndex = int32(txIndex)
 	case evmtypes.AttributeKeyTxGasUsed:
 		gasUsed, err := strconv.ParseUint(value, 10, 64)
 		if err != nil {

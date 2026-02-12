@@ -197,8 +197,11 @@ func (b *Backend) FeeHistory(
 	if err != nil {
 		return nil, err
 	}
-	blockNumber := int64(blkNumber) //#nosec G115
-	blockEnd := int64(lastBlock)    //#nosec G115
+	if uint64(blkNumber) > uint64(gomath.MaxInt64) {
+		return nil, fmt.Errorf("block number %d exceeds max int64", blkNumber)
+	}
+	blockNumber := int64(blkNumber)
+	blockEnd := int64(lastBlock)
 
 	switch lastBlock {
 	case rpc.EarliestBlockNumber:
@@ -369,10 +372,13 @@ func (b *Backend) SuggestGasTipCap(ctx context.Context, baseFee *big.Int) (_ *bi
 	// MaxDelta = BaseFee * (GasLimit - GasLimit / ElasticityMultiplier) / (GasLimit / ElasticityMultiplier) / Denominator
 	//          = BaseFee * (ElasticityMultiplier - 1) / Denominator
 	// ```t
-	maxDelta := baseFee.Int64() * (int64(params.Params.ElasticityMultiplier) - 1) / int64(params.Params.BaseFeeChangeDenominator) // #nosec G115
-	if maxDelta < 0 {
-		// impossible if the parameter validation passed.
-		maxDelta = 0
+	elasticity := new(big.Int).SetUint64(uint64(params.Params.ElasticityMultiplier))
+	denominator := new(big.Int).SetUint64(uint64(params.Params.BaseFeeChangeDenominator))
+	maxDelta := new(big.Int).Sub(elasticity, big.NewInt(1))
+	maxDelta.Mul(maxDelta, baseFee)
+	maxDelta.Div(maxDelta, denominator)
+	if maxDelta.Sign() < 0 {
+		maxDelta = big.NewInt(0)
 	}
-	return big.NewInt(maxDelta), nil
+	return maxDelta, nil
 }

@@ -160,12 +160,18 @@ func (f *Filter) Logs(ctx context.Context, logLimit int, blockLimit int64) (logs
 	}
 
 	// check bounds
-	if from > head || from > to {
+	if from > to {
 		return nil, errInvalidBlockRange
 	}
 
+	// If the range starts beyond head, return empty (geth-compatible)
+	if from > head {
+		return []*ethtypes.Log{}, nil
+	}
+
+	// Clamp 'to' to head if it exceeds the current chain height
 	if to > head {
-		return nil, errInvalidBlockRange
+		to = head
 	}
 
 	if blockLimit > 0 && to-from > uint64(blockLimit) {
@@ -183,6 +189,11 @@ func (f *Filter) Logs(ctx context.Context, logLimit int, blockLimit int64) (logs
 		bloom, err := f.backend.BlockBloomFromCometBlock(ctx, blockRes)
 		if err != nil {
 			return nil, fmt.Errorf("failed to query block bloom filter from block results: %w", err)
+		}
+
+		// check logs limit before fetching more
+		if len(logs) >= logLimit {
+			return nil, fmt.Errorf("query returned more than %d results", logLimit)
 		}
 
 		filtered, err := f.blockLogs(blockRes, bloom)

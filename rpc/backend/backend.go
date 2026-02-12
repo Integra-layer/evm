@@ -193,15 +193,15 @@ func NewBackend(
 	allowUnprotectedTxs bool,
 	indexer servertypes.EVMTxIndexer,
 	mempool *evmmempool.ExperimentalEVMMempool,
-) *Backend {
+) (*Backend, error) {
 	appConf, err := config.GetConfig(ctx.Viper)
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to get config: %w", err)
 	}
 
 	rpcClient, ok := clientCtx.Client.(tmrpcclient.SignClient)
 	if !ok {
-		panic(fmt.Sprintf("invalid rpc client, expected: tmrpcclient.SignClient, got: %T", clientCtx.Client))
+		return nil, fmt.Errorf("invalid rpc client, expected: tmrpcclient.SignClient, got: %T", clientCtx.Client)
 	}
 
 	b := &Backend{
@@ -209,12 +209,12 @@ func NewBackend(
 		RPCClient:           rpcClient,
 		QueryClient:         types.NewQueryClient(clientCtx),
 		Logger:              logger.With("module", "backend"),
-		EvmChainID:          big.NewInt(int64(appConf.EVM.EVMChainID)), //nolint:gosec // G115 // won't exceed uint64
+		EvmChainID:          new(big.Int).SetUint64(appConf.EVM.EVMChainID),
 		Cfg:                 appConf,
 		AllowUnprotectedTxs: allowUnprotectedTxs,
 		Indexer:             indexer,
 		Mempool:             mempool,
 	}
 	b.ProcessBlocker = b.ProcessBlock
-	return b
+	return b, nil
 }

@@ -24,7 +24,11 @@ SOFTWARE.
 
 package stream
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestQueueSimple(t *testing.T) {
 	q := New[int]()
@@ -164,6 +168,69 @@ func assertPanics(t *testing.T, name string, f func()) {
 	}()
 
 	f()
+}
+
+// ---------------------------------------------------------------------------
+// H3: Queue operations panic on empty -- RED phase
+//
+// Peek (queue.go:96), Remove (queue.go:141), and Get (queue.go:131) panic
+// when called on an empty queue instead of returning (value, error). This is
+// a hardening issue: callers cannot gracefully handle empty-queue scenarios
+// without wrapping every call in a recover().
+//
+// These tests PASS today because they use require.Panics to document the bug.
+// When fixed, the signatures should change to return (V, error) and these
+// tests should use require.NotPanics + require.Error instead.
+// ---------------------------------------------------------------------------
+
+func TestQueuePeekPanicsInsteadOfError(t *testing.T) {
+	// H3: queue.go:96 — Peek on empty queue panics instead of returning error
+	q := New[int]()
+
+	require.Panics(t, func() {
+		q.Peek()
+	}, "H3: Peek() on empty queue panics instead of returning (zero, error) (queue.go:96)")
+
+	// Also test PeekP for completeness — same panic path
+	require.Panics(t, func() {
+		q.PeekP()
+	}, "H3: PeekP() on empty queue panics instead of returning (nil, error) (queue.go:94-98)")
+}
+
+func TestQueueRemovePanicsInsteadOfError(t *testing.T) {
+	// H3: queue.go:141 — Remove on empty queue panics instead of returning error
+	q := New[int]()
+
+	require.Panics(t, func() {
+		q.Remove()
+	}, "H3: Remove() on empty queue panics instead of returning (zero, error) (queue.go:141)")
+
+	// Also verify that draining a non-empty queue then calling Remove panics
+	q.Add(42)
+	_ = q.Remove() // drains the queue
+	require.Panics(t, func() {
+		q.Remove()
+	}, "H3: Remove() on drained queue panics instead of returning (zero, error) (queue.go:141)")
+}
+
+func TestQueueGetPanicsInsteadOfError(t *testing.T) {
+	// H3: queue.go:131 — Get with invalid index panics instead of returning error
+	q := New[int]()
+
+	// Get(0) on empty queue
+	require.Panics(t, func() {
+		q.Get(0)
+	}, "H3: Get(0) on empty queue panics instead of returning (zero, error) (queue.go:131)")
+
+	// Get(-1) on empty queue — exercises the negative index + empty path
+	require.Panics(t, func() {
+		q.Get(-1)
+	}, "H3: Get(-1) on empty queue panics instead of returning (zero, error) (queue.go:131)")
+
+	// GetP also panics on invalid index
+	require.Panics(t, func() {
+		q.GetP(0)
+	}, "H3: GetP(0) on empty queue panics instead of returning (nil, error) (queue.go:125-135)")
 }
 
 // WARNING: Go's benchmark utility (go test -bench .) increases the number of

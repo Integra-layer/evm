@@ -165,7 +165,7 @@ func (b *Backend) EthBlockFromCometBlock(
 	// 2. get miner
 	miner, err := b.MinerFromCometBlock(ctx, resBlock)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get miner(block proposer) address from comet block")
+		return nil, fmt.Errorf("failed to get miner(block proposer) address from comet block: %w", err)
 	}
 
 	// 3. get block gasLimit
@@ -206,7 +206,11 @@ func (b *Backend) EthBlockFromCometBlock(
 			// block gas limit has exceeded, other txs must have failed with same reason.
 			break
 		}
-		gasUsed += uint64(txsResult.GetGasUsed()) // #nosec G115 -- checked for int overflow already
+		gu := txsResult.GetGasUsed()
+		if gu < 0 {
+			return nil, fmt.Errorf("negative gas used in tx result at height %d", cmtBlock.Height)
+		}
+		gasUsed += uint64(gu)
 	}
 	ethHeader.GasUsed = gasUsed
 
@@ -275,6 +279,13 @@ func (b *Backend) ReceiptsFromCometBlock(
 			return nil, fmt.Errorf("tx not found: hash=%s, error=%s", ethMsg.Hash(), err.Error())
 		}
 
+		// Resolve unindexed eth tx index: -1 is a sentinel meaning "not yet determined".
+		// Without this check, int32(-1) cast to uint wraps to max uint64 (18446744073709551615),
+		// which breaks viem/wagmi clients with IntegerOutOfRangeError.
+		if txResult.EthTxIndex == -1 {
+			txResult.EthTxIndex = int32(i) // #nosec G115 -- i is bounded by len(msgs)
+		}
+
 		cumulatedGasUsed += txResult.GasUsed
 
 		var effectiveGasPrice *big.Int
@@ -282,6 +293,9 @@ func (b *Backend) ReceiptsFromCometBlock(
 			effectiveGasPrice = rpctypes.EffectiveGasPrice(ethMsg.Raw.Transaction, baseFee)
 		} else {
 			effectiveGasPrice = ethMsg.Raw.GasFeeCap()
+		}
+		if effectiveGasPrice == nil {
+			effectiveGasPrice = big.NewInt(0)
 		}
 
 		var status uint64
