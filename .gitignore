@@ -65,3 +65,16 @@ tests/systemtests/binaries
 tests/systemtests/testnet
 .testnets
 bin/
+
+# AI-generated codemaps (regenerable)
+codemaps/
+
+# AI tooling (ephemeral, regenerate with Claude Code)
+.omc/
+.cursor/
+.cursorignore
+.cursorindexingignore
+.cline/
+memory-bank/
+.aider*
+.copilot/
