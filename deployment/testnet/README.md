@@ -132,7 +132,7 @@ curl -X POST https://faucet.integralayer.com/api/faucet \
 | **Unbonding Period** | 1 day (86400s) |
 | **Max Validators** | 100 |
 | **Min Commission** | 0% |
-| **Bond Denom** | `aoirl` |
+| **Bond Denom** | `airl` |
 
 > **Note:** Shorter unbonding period for faster testing cycles.
 
@@ -187,7 +187,7 @@ curl -X POST https://faucet.integralayer.com/api/faucet \
 
 ```bash
 # Set chain ID
-export CHAIN_ID="ormos-1"
+export CHAIN_ID="integra-testnet-1"
 
 # Initialize node
 integrad init <moniker> --chain-id $CHAIN_ID

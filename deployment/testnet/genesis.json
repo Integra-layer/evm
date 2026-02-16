@@ -1,6 +1,6 @@
 {
   "genesis_time": "2026-01-22T00:00:00.000000000Z",
-  "chain_id": "ormos-1",
+  "chain_id": "integra-testnet-1",
   "initial_height": "1",
   "consensus_params": {
     "block": {

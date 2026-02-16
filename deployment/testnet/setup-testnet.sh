@@ -2,7 +2,7 @@
 # ============================================
 # Script: setup-testnet.sh
 # Purpose: Full testnet setup with 3 validators
-# Network: Ormos Testnet (ormos-1)
+# Network: Integra Testnet (integra-testnet-1)
 # ============================================
 
 set -e
