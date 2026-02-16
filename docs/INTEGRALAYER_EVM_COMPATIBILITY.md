@@ -46,7 +46,7 @@ This document provides comprehensive EVM compatibility information for Integrala
 | **WebSocket URL** | `wss://ws.integralayer.com` |
 | **Block Explorer** | `https://explorer.integralayer.com` |
 | **Native Token** | IRL (18 decimals) |
-| **Base Denom** | `ailr` (atto-IRL) |
+| **Base Denom** | `airl` (atto-IRL) |
 | **Current Block** | ~164,778 (as of testing) |
 | **EVM Version** | **Cancun** |
 

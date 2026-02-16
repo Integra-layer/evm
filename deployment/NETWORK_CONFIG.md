@@ -20,15 +20,15 @@ Integra operates two networks for different purposes:
 
 | Parameter | Mainnet (Integra) | Testnet (Ormos) |
 |-----------|-------------------|-----------------|
-| **Chain ID** | `integra-1` | `ormos-1` |
-| **EVM Chain ID** | `52430` (0xCCEE) | `52431` (0xCCEF) |
+| **Chain ID** | `integra-1` | `integra-testnet-1` |
+| **EVM Chain ID** | `26217` (0x6669) | `26218` (0x666A) |
 | **Network Name** | Integra | Ormos |
-| **Token Name** | Integra | Ormos IRL |
-| **Token Symbol** | IRL | oIRL |
-| **Base Denom** | `airl` | `aoirl` |
-| **Address Prefix** | `integra` | `ormos` |
+| **Token Name** | Integra | IRL |
+| **Token Symbol** | IRL | IRL |
+| **Base Denom** | `airl` | `airl` |
+| **Address Prefix** | `integra` | `integra` |
 | **Decimals** | 18 | 18 |
-| **Description** | "The native token of Integra" | "The native token of Ormos Testnet" |
+| **Description** | "The native token of Integra" | "The native token of Integra Testnet" |
 
 ---
 
@@ -79,7 +79,7 @@ Integra operates two networks for different purposes:
 | **Unbonding Period** | 21 days | 1 day |
 | **Max Validators** | 100 | 100 |
 | **Min Commission** | 0% | 0% |
-| **Bond Denom** | `airl` | `aoirl` |
+| **Bond Denom** | `airl` | `airl` |
 
 ---
 
@@ -129,7 +129,7 @@ Base Fee = (0.5 IRL × 10^18 airl) / 21,000 gas
 ```javascript
 // ethers.js / viem
 const mainnetConfig = {
-  chainId: 52430,
+  chainId: 26217,
   name: 'Integra Mainnet',
   network: 'integra',
   rpcUrls: {
@@ -152,16 +152,16 @@ const mainnetConfig = {
 ```javascript
 // ethers.js / viem
 const testnetConfig = {
-  chainId: 52431,
-  name: 'Ormos Testnet',
-  network: 'ormos',
+  chainId: 26218,
+  name: 'Integra Testnet',
+  network: 'integra-testnet',
   rpcUrls: {
     default: { http: ['https://testnet-rpc.integralayer.com'] },
     public: { http: ['https://testnet-rpc.integralayer.com'] }
   },
   nativeCurrency: {
-    name: 'Ormos IRL',
-    symbol: 'oIRL',
+    name: 'IRL',
+    symbol: 'IRL',
     decimals: 18
   },
   blockExplorers: {
@@ -180,7 +180,7 @@ const testnetConfig = {
 |-------|-------|
 | Network Name | Integra Mainnet |
 | RPC URL | https://rpc.integralayer.com |
-| Chain ID | 52430 |
+| Chain ID | 26217 |
 | Currency Symbol | IRL |
 | Block Explorer | https://explorer.integralayer.com |
 
@@ -188,10 +188,10 @@ const testnetConfig = {
 
 | Field | Value |
 |-------|-------|
-| Network Name | Ormos Testnet |
+| Network Name | Integra Testnet |
 | RPC URL | https://testnet-rpc.integralayer.com |
-| Chain ID | 52431 |
-| Currency Symbol | oIRL |
+| Chain ID | 26218 |
+| Currency Symbol | IRL |
 | Block Explorer | https://testnet-explorer.integralayer.com |
 
 ### Keplr - Mainnet
@@ -234,33 +234,33 @@ const keplrMainnetConfig = {
 
 ```javascript
 const keplrTestnetConfig = {
-  chainId: "ormos-1",
-  chainName: "Ormos Testnet",
+  chainId: "integra-testnet-1",
+  chainName: "Integra Testnet",
   rpc: "https://testnet-rpc.integralayer.com:26657",
   rest: "https://testnet-api.integralayer.com",
   bip44: { coinType: 60 },
   bech32Config: {
-    bech32PrefixAccAddr: "ormos",
-    bech32PrefixAccPub: "ormospub",
-    bech32PrefixValAddr: "ormosvaloper",
-    bech32PrefixValPub: "ormosvaloperpub",
-    bech32PrefixConsAddr: "ormosvalcons",
-    bech32PrefixConsPub: "ormosvalconspub"
+    bech32PrefixAccAddr: "integra",
+    bech32PrefixAccPub: "integrapub",
+    bech32PrefixValAddr: "integravaloper",
+    bech32PrefixValPub: "integravaloperpub",
+    bech32PrefixConsAddr: "integravalcons",
+    bech32PrefixConsPub: "integravalconspub"
   },
   currencies: [{
-    coinDenom: "oIRL",
-    coinMinimalDenom: "aoirl",
+    coinDenom: "IRL",
+    coinMinimalDenom: "airl",
     coinDecimals: 18
   }],
   feeCurrencies: [{
-    coinDenom: "oIRL",
-    coinMinimalDenom: "aoirl",
+    coinDenom: "IRL",
+    coinMinimalDenom: "airl",
     coinDecimals: 18,
     gasPriceStep: { low: 0.01, average: 0.025, high: 0.04 }
   }],
   stakeCurrency: {
-    coinDenom: "oIRL",
-    coinMinimalDenom: "aoirl",
+    coinDenom: "IRL",
+    coinMinimalDenom: "airl",
     coinDecimals: 18
   }
 };
@@ -349,7 +349,7 @@ deployment/
 
 | Item | Previous | Updated |
 |------|----------|---------|
-| Base Denom | `ailr` (typo) | `airl` |
+| Base Denom | `ailr` (typo, fixed) | `airl` |
 | Description | "...Real World Asset Layer 1" | "The native token of Integra" |
 | Deposit Period | 2 days | **7 days** |
 | Voting Period | 2 days | **7 days** |

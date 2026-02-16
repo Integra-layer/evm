@@ -12,13 +12,13 @@ import (
 
 // Integra Network Constants
 const (
-	// BaseDenom is the base denomination for the Integra Network (atto-ILR)
-	BaseDenom = "ailr"
+	// BaseDenom is the base denomination for the Integra Network (atto-IRL)
+	BaseDenom = "airl"
 	// DisplayDenom is the display denomination for the Integra Network
-	DisplayDenom = "ilr"
+	DisplayDenom = "irl"
 	// TokenSymbol is the token symbol for the Integra Network
-	TokenSymbol = "ILR"
-	// IntegraNativePrecompile is the wrapped ILR contract address
+	TokenSymbol = "IRL"
+	// IntegraNativePrecompile is the wrapped IRL contract address
 	IntegraNativePrecompile = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
 )
 
@@ -33,7 +33,7 @@ type GenesisState map[string]json.RawMessage
 
 // NewEVMGenesisState returns the default genesis state for the EVM module.
 //
-// NOTE: for the Integra Network we set the ILR denomination,
+// NOTE: for the Integra Network we set the IRL denomination,
 // enable ALL precompiles, and include default preinstalls.
 func NewEVMGenesisState() *evmtypes.GenesisState {
 	evmGenState := evmtypes.DefaultGenesisState()
@@ -46,8 +46,8 @@ func NewEVMGenesisState() *evmtypes.GenesisState {
 
 // NewErc20GenesisState returns the default genesis state for the ERC20 module.
 //
-// NOTE: for the Integra Network we set up the native ILR token pair
-// with the wrapped ILR precompile contract.
+// NOTE: for the Integra Network we set up the native IRL token pair
+// with the wrapped IRL precompile contract.
 func NewErc20GenesisState() *erc20types.GenesisState {
 	erc20GenState := erc20types.DefaultGenesisState()
 	erc20GenState.TokenPairs = []erc20types.TokenPair{
@@ -65,7 +65,7 @@ func NewErc20GenesisState() *erc20types.GenesisState {
 
 // NewMintGenesisState returns the default genesis state for the mint module.
 //
-// NOTE: for the Integra Network we set the mint denomination to ailr.
+// NOTE: for the Integra Network we set the mint denomination to airl.
 func NewMintGenesisState() *minttypes.GenesisState {
 	mintGenState := minttypes.DefaultGenesisState()
 	mintGenState.Params.MintDenom = BaseDenom

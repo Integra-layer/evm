@@ -1,7 +1,7 @@
-# Ormos Testnet Configuration
+# Integra Testnet Configuration
 
-> **Network:** Ormos Testnet  
-> **Chain ID:** `ormos-1`  
+> **Network:** Integra Testnet (Ormos)
+> **Chain ID:** `integra-testnet-1`
 > **Status:** Testing Environment
 
 ---
@@ -16,14 +16,14 @@ Ormos Testnet is the testing environment for the Integra Network. Use this netwo
 
 | Parameter | Value |
 |-----------|-------|
-| **Chain ID** | `ormos-1` |
-| **Network Name** | Ormos |
-| **Native Token** | oIRL |
-| **Token Symbol** | oIRL |
+| **Chain ID** | `integra-testnet-1` |
+| **Network Name** | Integra Testnet |
+| **Native Token** | IRL |
+| **Token Symbol** | IRL |
 | **Decimals** | 18 |
-| **Base Denom** | `aoirl` |
-| **Address Prefix** | `ormos` |
-| **Valoper Prefix** | `ormosvaloper` |
+| **Base Denom** | `airl` |
+| **Address Prefix** | `integra` |
+| **Valoper Prefix** | `integravaloper` |
 
 ---
 
@@ -45,8 +45,8 @@ Ormos Testnet is the testing environment for the Integra Network. Use this netwo
 
 | Parameter | Value |
 |-----------|-------|
-| **EVM Chain ID** | `52431` |
-| **Currency Symbol** | oIRL |
+| **EVM Chain ID** | `26218` |
+| **Currency Symbol** | IRL |
 | **Block Explorer** | https://testnet-explorer.integralayer.com |
 
 ### MetaMask Configuration
@@ -72,7 +72,7 @@ module.exports = {
   networks: {
     ormos: {
       url: "https://testnet-rpc.integralayer.com",
-      chainId: 52431,
+      chainId: 26218,
       accounts: [process.env.PRIVATE_KEY]
     }
   }
@@ -86,7 +86,7 @@ module.exports = {
 ormos = "https://testnet-rpc.integralayer.com"
 
 [etherscan]
-ormos = { key = "", chain = 52431, url = "https://testnet-explorer.integralayer.com/api" }
+ormos = { key = "", chain = 26218, url = "https://testnet-explorer.integralayer.com/api" }
 ```
 
 ---
@@ -217,11 +217,11 @@ integrad start
 
 | Parameter | Testnet (Ormos) | Mainnet (Integra) |
 |-----------|-----------------|-------------------|
-| Chain ID | `ormos-1` | `integra-1` |
-| Token Symbol | oIRL | IRL |
-| Base Denom | `aoirl` | `ailr` |
-| EVM Chain ID | 52431 | 52430 |
-| Address Prefix | `ormos` | `integra` |
+| Chain ID | `integra-testnet-1` | `integra-1` |
+| Token Symbol | IRL | IRL |
+| Base Denom | `airl` | `airl` |
+| EVM Chain ID | 26218 | 26217 |
+| Address Prefix | `integra` | `integra` |
 | Unbonding | 1 day | 21 days |
 | Governance Min Deposit | 1,000 oIRL | 100,000,000 IRL |
 | Governance Voting | 1 hour | 2 days |

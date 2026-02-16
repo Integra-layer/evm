@@ -10,7 +10,7 @@
 
 Cosmos EVM is a framework that adds full Ethereum Virtual Machine compatibility to Cosmos SDK-based blockchains. It enables Solidity smart contracts, Ethereum tooling (MetaMask, Hardhat, Foundry, ethers.js), and the standard Ethereum JSON-RPC API to work natively on a chain that also benefits from CometBFT consensus, IBC cross-chain communication, and the Cosmos SDK module ecosystem.
 
-The Integra Network fork customizes this framework for the Integra chain (chain ID `integra-1`, EVM chain ID `26217`, native token **IRL** / base denom `ailr`).
+The Integra Network fork customizes this framework for the Integra chain (chain ID `integra-1`, EVM chain ID `26217`, native token **IRL** / base denom `airl`).
 
 ### Core Stack
 

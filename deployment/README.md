@@ -8,8 +8,8 @@ This guide provides step-by-step instructions for deploying the Integra EVM Netw
 |----------|-------|
 | **Chain ID** | `integra-1` |
 | **EVM Chain ID** | `26217` |
-| **Token Symbol** | `ILR` |
-| **Base Denomination** | `ailr` (atto-ILR, 18 decimals) |
+| **Token Symbol** | `IRL` |
+| **Base Denomination** | `airl` (atto-IRL, 18 decimals) |
 | **Validators** | 3 (equal voting power) |
 
 ### Node Information
@@ -227,7 +227,7 @@ Add the Integra Network to MetaMask:
 | Network Name | Integra Network |
 | RPC URL | `http://165.227.118.77:8545` |
 | Chain ID | `26217` |
-| Currency Symbol | `ILR` |
+| Currency Symbol | `IRL` |
 | Block Explorer | (leave blank) |
 
 ---
@@ -264,7 +264,7 @@ intgd status --home /root/.intgd | jq '.sync_info'
 intgd query bank balances <address> --home /root/.intgd
 
 # Send tokens
-intgd tx bank send <from> <to> <amount>ailr \
+intgd tx bank send <from> <to> <amount>airl \
     --chain-id integra-1 \
     --home /root/.intgd \
     --keyring-backend file \
@@ -272,7 +272,7 @@ intgd tx bank send <from> <to> <amount>ailr \
     --gas-adjustment 1.5
 
 # Delegate to validator
-intgd tx staking delegate <validator-address> <amount>ailr \
+intgd tx staking delegate <validator-address> <amount>airl \
     --from <key-name> \
     --chain-id integra-1 \
     --home /root/.intgd \

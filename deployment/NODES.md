@@ -3,7 +3,7 @@
 ## Network Configuration
 - **Chain ID:** `integra-1`
 - **EVM Chain ID:** `26217`
-- **Token Denom:** `ILR` (base unit: `ailr` with 18 decimals)
+- **Token Denom:** `IRL` (base unit: `airl` with 18 decimals)
 - **Bech32 Prefix:** `integra`
 
 ---
@@ -84,7 +84,7 @@ Use this in `config.toml` for all nodes:
 - [x] Binary built on all nodes
 - [x] Nodes initialized with chain-id `integra-1`
 - [x] Validator keys generated
-- [ ] Genesis configured with `ailr` denom
+- [ ] Genesis configured with `airl` denom
 - [ ] Genesis accounts added
 - [ ] Gentxs created and collected
 - [ ] Network started

@@ -21,7 +21,7 @@ Integra Mainnet is the production network for the Integra Real World Asset Layer
 | **Native Token** | IRL |
 | **Token Symbol** | IRL |
 | **Decimals** | 18 |
-| **Base Denom** | `ailr` |
+| **Base Denom** | `airl` |
 | **Address Prefix** | `integra` |
 | **Valoper Prefix** | `integravaloper` |
 
@@ -44,7 +44,7 @@ Integra Mainnet is the production network for the Integra Real World Asset Layer
 
 | Parameter | Value |
 |-----------|-------|
-| **EVM Chain ID** | `52430` |
+| **EVM Chain ID** | `26217` |
 | **Currency Symbol** | IRL |
 | **Block Explorer** | https://explorer.integralayer.com |
 
@@ -71,7 +71,7 @@ module.exports = {
   networks: {
     integra: {
       url: "https://rpc.integralayer.com",
-      chainId: 52430,
+      chainId: 26217,
       accounts: [process.env.PRIVATE_KEY]
     }
   }
@@ -85,7 +85,7 @@ module.exports = {
 integra = "https://rpc.integralayer.com"
 
 [etherscan]
-integra = { key = "", chain = 52430, url = "https://explorer.integralayer.com/api" }
+integra = { key = "", chain = 26217, url = "https://explorer.integralayer.com/api" }
 ```
 
 ---
@@ -107,7 +107,7 @@ integra = { key = "", chain = 52430, url = "https://explorer.integralayer.com/ap
 | **Unbonding Period** | 21 days |
 | **Max Validators** | 100 |
 | **Min Commission** | 0% |
-| **Bond Denom** | `ailr` |
+| **Bond Denom** | `airl` |
 
 ---
 

@@ -36,7 +36,7 @@ Cosmos EVM adds full EVM compatibility to Cosmos SDK chains. This repo contains 
 - App: `/integra/app.go` (1113 lines)
 - Config: `/integra/config/` (app.toml, config.toml templates)
 
-**CRITICAL GOTCHA**: Token is IRL/airl, NOT ILR/ailr. Code comment at line 5 of `integra/app.go` has legacy "ILR" reference.
+**CRITICAL GOTCHA**: Token is IRL/airl, NOT ILR/ailr.
 
 **CRITICAL GOTCHA #2**: Default EVM chain ID after `intgd init` is 262144 (WRONG). Must manually set to 26217 (mainnet) or 26218 (testnet) in `app.toml` under `[evm]` section.
 
@@ -199,7 +199,7 @@ Exposes Ethereum-compatible API at `localhost:8545` (configurable in `app.toml`)
 - **Binary**: `intgd` (if built separately) or `evmd` from `/integra/cmd/`
 - **App**: `/integra/app.go` (1113 lines)
 - **Config**: `/integra/config/` (templates for app.toml, config.toml)
-- **Chain params**: integra-1 chain ID, ailr denom
+- **Chain params**: integra-1 chain ID, airl denom
 
 ### Generic evmd
 - **Binary**: `evmd` from `/evmd/cmd/`
@@ -272,7 +272,7 @@ curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getCode","params":["0x...","
 - **Precompile call fails**: Verify precompile address (0x800-0x80B) and ABI match. Check `precompiles/<name>/precompile.go`.
 
 ### Common Gotchas
-1. **Token naming**: Integra uses IRL (ailr), NOT ILR. Code comment has legacy reference.
+1. **Token naming**: Integra uses IRL (airl), NOT ILR.
 2. **Chain ID mismatch**: Default EVM chain ID after init is 262144. Must set to 26217 (mainnet) or 26218 (testnet) in app.toml.
 3. **CGO requirement**: Cannot build without CGO. Native M1/M2 Mac builds need Rosetta or cross-compile.
 4. **Geth fork**: Uses Cosmos fork of go-ethereum. Standard geth packages incompatible.

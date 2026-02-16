@@ -2,7 +2,7 @@ package integra
 
 // Integra Network EVM App
 // Chain ID: integra-1
-// Token: ILR (ailr base denom)
+// Token: IRL (airl base denom)
 
 import (
 	"encoding/json"
