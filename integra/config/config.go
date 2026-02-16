@@ -9,6 +9,8 @@ import (
 const (
 	// IntegraEVMChainID is the EIP-155 chain ID for Integra mainnet.
 	IntegraEVMChainID uint64 = 26217
+	// IntegraTestnetEVMChainID is the EIP-155 chain ID for Integra testnet.
+	IntegraTestnetEVMChainID uint64 = 26218
 )
 
 func MustGetDefaultNodeHome() string {

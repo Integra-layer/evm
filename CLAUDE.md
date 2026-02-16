@@ -27,15 +27,18 @@ Cosmos EVM adds full EVM compatibility to Cosmos SDK chains. This repo contains 
 - App: `/evmd/app.go` (1109 lines)
 
 ### 2. Integra Network
-- Chain ID: integra-1 (Bech32 prefix: integra)
-- Token: **IRL** (base denom: **ailr**)
+- Mainnet Chain ID: integra-1 (Bech32 prefix: integra)
+- Testnet Chain ID: integra-testnet-1
+- EVM Chain ID (Mainnet): **26217** (`0x6669`)
+- EVM Chain ID (Testnet): **26218** (`0x666A`)
+- Token: **IRL** (base denom: **airl**)
 - Location: `/integra/`
 - App: `/integra/app.go` (1113 lines)
 - Config: `/integra/config/` (app.toml, config.toml templates)
 
-**CRITICAL GOTCHA**: Token is IRL/ailr, NOT ILR. Code comment at line 5 of `integra/app.go` has legacy "ILR" reference.
+**CRITICAL GOTCHA**: Token is IRL/airl, NOT ILR/ailr. Code comment at line 5 of `integra/app.go` has legacy "ILR" reference.
 
-**CRITICAL GOTCHA #2**: Default EVM chain ID after `intgd init` is 262144 (WRONG). Must manually set to 26217 for Integra in `app.toml` under `[evm]` section.
+**CRITICAL GOTCHA #2**: Default EVM chain ID after `intgd init` is 262144 (WRONG). Must manually set to 26217 (mainnet) or 26218 (testnet) in `app.toml` under `[evm]` section.
 
 ## Architecture
 
@@ -214,7 +217,7 @@ evmd init <moniker> --chain-id 9001 --home ~/.evmd
 intgd init <moniker> --chain-id integra-1 --home ~/.integra
 ```
 
-**CRITICAL**: After init, check `~/.evmd/config/app.toml` and set correct EVM chain ID (26217 for Integra, NOT 262144).
+**CRITICAL**: After init, check `~/.evmd/config/app.toml` and set correct EVM chain ID (26217 for mainnet, 26218 for testnet — NOT 262144).
 
 ### Add Keys
 ```bash
@@ -270,7 +273,7 @@ curl -X POST --data '{"jsonrpc":"2.0","method":"eth_getCode","params":["0x...","
 
 ### Common Gotchas
 1. **Token naming**: Integra uses IRL (ailr), NOT ILR. Code comment has legacy reference.
-2. **Chain ID mismatch**: Default EVM chain ID after init is 262144. Must set to 26217 for Integra in app.toml.
+2. **Chain ID mismatch**: Default EVM chain ID after init is 262144. Must set to 26217 (mainnet) or 26218 (testnet) in app.toml.
 3. **CGO requirement**: Cannot build without CGO. Native M1/M2 Mac builds need Rosetta or cross-compile.
 4. **Geth fork**: Uses Cosmos fork of go-ethereum. Standard geth packages incompatible.
 5. **Keyring algo**: Must use `eth_secp256k1` for Ethereum-compatible addresses. Default `secp256k1` creates Cosmos-only keys.
