@@ -38,8 +38,8 @@ Integra operates two networks for different purposes:
 
 | Service | URL |
 |---------|-----|
-| EVM RPC | `https://rpc.integralayer.com` |
-| Cosmos RPC | `https://rpc.integralayer.com:26657` |
+| EVM RPC | `https://evm.integralayer.com` |
+| Cosmos RPC | `https://rpc.integralayer.com` |
 | REST API | `https://api.integralayer.com` |
 | gRPC | `grpc.integralayer.com:9090` |
 | WebSocket | `wss://rpc.integralayer.com/websocket` |
@@ -134,8 +134,8 @@ const mainnetConfig = {
   name: 'Integra Mainnet',
   network: 'integra',
   rpcUrls: {
-    default: { http: ['https://rpc.integralayer.com'] },
-    public: { http: ['https://rpc.integralayer.com'] }
+    default: { http: ['https://evm.integralayer.com'] },
+    public: { http: ['https://evm.integralayer.com'] }
   },
   nativeCurrency: {
     name: 'Integra',
@@ -180,7 +180,7 @@ const testnetConfig = {
 | Field | Value |
 |-------|-------|
 | Network Name | Integra Mainnet |
-| RPC URL | https://rpc.integralayer.com |
+| RPC URL | https://evm.integralayer.com |
 | Chain ID | 26217 |
 | Currency Symbol | IRL |
 | Block Explorer | https://explorer.integralayer.com |
