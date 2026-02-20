@@ -31,12 +31,12 @@ Ormos Testnet is the testing environment for the Integra Network. Use this netwo
 
 | Service | URL |
 |---------|-----|
-| **EVM JSON-RPC** | `https://testnet-rpc.integralayer.com` |
-| **Cosmos RPC** | `https://testnet-rpc.integralayer.com:26657` |
-| **REST API** | `https://testnet-api.integralayer.com` |
-| **gRPC** | `testnet-grpc.integralayer.com:9090` |
-| **WebSocket** | `wss://testnet-rpc.integralayer.com/websocket` |
-| **Block Explorer** | `https://testnet-explorer.integralayer.com` |
+| **EVM JSON-RPC** | `https://ormos.integralayer.com/rpc` |
+| **Cosmos RPC** | `https://ormos.integralayer.com/cometbft` |
+| **REST API** | `https://ormos.integralayer.com/rest` |
+| **EVM WebSocket** | `wss://ormos.integralayer.com/ws` |
+| **Cosmos WebSocket** | `wss://ormos.integralayer.com/cometbft/websocket` |
+| **Block Explorer** | `https://testnet.blockscout.integralayer.com` |
 | **Faucet** | `https://faucet.integralayer.com` |
 
 ---
@@ -47,7 +47,7 @@ Ormos Testnet is the testing environment for the Integra Network. Use this netwo
 |-----------|-------|
 | **EVM Chain ID** | `26218` |
 | **Currency Symbol** | IRL |
-| **Block Explorer** | https://testnet-explorer.integralayer.com |
+| **Block Explorer** | https://testnet.blockscout.integralayer.com |
 
 ### MetaMask Configuration
 
@@ -60,8 +60,8 @@ Ormos Testnet is the testing environment for the Integra Network. Use this netwo
     "symbol": "oIRL",
     "decimals": 18
   },
-  "rpcUrls": ["https://testnet-rpc.integralayer.com"],
-  "blockExplorerUrls": ["https://testnet-explorer.integralayer.com"]
+  "rpcUrls": ["https://ormos.integralayer.com/rpc"],
+  "blockExplorerUrls": ["https://testnet.blockscout.integralayer.com"]
 }
 ```
 
@@ -71,7 +71,7 @@ Ormos Testnet is the testing environment for the Integra Network. Use this netwo
 module.exports = {
   networks: {
     ormos: {
-      url: "https://testnet-rpc.integralayer.com",
+      url: "https://ormos.integralayer.com/rpc",
       chainId: 26218,
       accounts: [process.env.PRIVATE_KEY]
     }
@@ -83,10 +83,10 @@ module.exports = {
 
 ```toml
 [rpc_endpoints]
-ormos = "https://testnet-rpc.integralayer.com"
+ormos = "https://ormos.integralayer.com/rpc"
 
 [etherscan]
-ormos = { key = "", chain = 26218, url = "https://testnet-explorer.integralayer.com/api" }
+ormos = { key = "", chain = 26218, url = "https://testnet.blockscout.integralayer.com/api" }
 ```
 
 ---

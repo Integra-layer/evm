@@ -57,7 +57,7 @@ This document provides comprehensive EVM compatibility information for Integrala
 | **Network Name** | Integralayer Testnet |
 | **Chain ID (EVM)** | `1341` (`0x53D`) |
 | **Chain ID (Cosmos)** | `integratestnet_1341-1` |
-| **EVM RPC URL** | `https://testnet-rpc.integralayer.com` |
+| **EVM RPC URL** | `https://ormos.integralayer.com/rpc` |
 | **Current Block** | ~1,368,138 (as of testing) |
 | **EVM Version** | **Shanghai** ⚠️ |
 
@@ -123,8 +123,8 @@ curl -X POST https://evm.integralayer.com \
   -d '{"jsonrpc":"2.0","method":"eth_call","params":[{"data":"0x60206000600060005e00"},"latest"],"id":1}'
 # Result: {"result":"0x"}  ✅ SUCCESS
 
-# Testnet (testnet-rpc.integralayer.com):  
-curl -X POST https://testnet-rpc.integralayer.com \
+# Testnet (ormos.integralayer.com/rpc):  
+curl -X POST https://ormos.integralayer.com/rpc \
   -d '{"jsonrpc":"2.0","method":"eth_call","params":[{"data":"0x60206000600060005e00"},"latest"],"id":1}'
 # Result: {"error":{"code":-32000,"message":"invalid opcode: opcode 0x5e not defined"}}  ❌ FAIL
 ```
@@ -156,7 +156,7 @@ module.exports = {
   },
   networks: {
     integraTestnet: {
-      url: "https://testnet-rpc.integralayer.com",
+      url: "https://ormos.integralayer.com/rpc",
       chainId: 1341,
       accounts: [process.env.PRIVATE_KEY],
     },
@@ -189,7 +189,7 @@ evm_version = "shanghai"
 evm_version = "cancun"
 
 [rpc_endpoints]
-integra_testnet = "https://testnet-rpc.integralayer.com"
+integra_testnet = "https://ormos.integralayer.com/rpc"
 integra_preprod = "https://evm.integralayer.com"
 ```
 
@@ -243,7 +243,7 @@ export const integraTestnet = defineChain({
     symbol: 'IRL',
   },
   rpcUrls: {
-    default: { http: ['https://testnet-rpc.integralayer.com'] },
+    default: { http: ['https://ormos.integralayer.com/rpc'] },
   },
   blockExplorers: {
     default: { name: 'Explorer', url: 'https://explorer.integralayer.com' },
@@ -280,7 +280,7 @@ import { ethers } from 'ethers';
 
 // Testnet
 const testnetProvider = new ethers.JsonRpcProvider(
-  'https://testnet-rpc.integralayer.com',
+  'https://ormos.integralayer.com/rpc',
   { chainId: 1341, name: 'integra-testnet' }
 );
 
@@ -297,7 +297,7 @@ const preprodProvider = new ethers.JsonRpcProvider(
 import Web3 from 'web3';
 
 // Testnet
-const web3Testnet = new Web3('https://testnet-rpc.integralayer.com');
+const web3Testnet = new Web3('https://ormos.integralayer.com/rpc');
 
 // Pre-Production  
 const web3PreProd = new Web3('https://evm.integralayer.com');
@@ -358,7 +358,7 @@ const web3PreProd = new Web3('https://evm.integralayer.com');
 
 | Service | URL | Protocol |
 |---------|-----|----------|
-| EVM JSON-RPC | `https://testnet-rpc.integralayer.com` | HTTPS |
+| EVM JSON-RPC | `https://ormos.integralayer.com/rpc` | HTTPS |
 
 > ⚠️ **Note:** Additional testnet endpoints may not be documented or available.
 

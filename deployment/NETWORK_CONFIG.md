@@ -49,12 +49,13 @@ Integra operates two networks for different purposes:
 
 | Service | URL |
 |---------|-----|
-| EVM RPC | `https://testnet-rpc.integralayer.com` |
-| Cosmos RPC | `https://testnet-rpc.integralayer.com:26657` |
-| REST API | `https://testnet-api.integralayer.com` |
-| gRPC | `testnet-grpc.integralayer.com:9090` |
-| WebSocket | `wss://testnet-rpc.integralayer.com/websocket` |
-| Explorer | `https://testnet-explorer.integralayer.com` |
+| EVM RPC | `https://ormos.integralayer.com/rpc` |
+| Cosmos RPC | `https://ormos.integralayer.com/cometbft` |
+| REST API | `https://ormos.integralayer.com/rest` |
+| EVM WebSocket | `wss://ormos.integralayer.com/ws` |
+| Cosmos WebSocket | `wss://ormos.integralayer.com/cometbft/websocket` |
+| Explorer | `https://testnet.explorer.integralayer.com` |
+| Blockscout (EVM) | `https://testnet.blockscout.integralayer.com` |
 | Faucet | `https://faucet.integralayer.com` |
 
 ---
@@ -156,8 +157,8 @@ const testnetConfig = {
   name: 'Integra Testnet',
   network: 'integra-testnet',
   rpcUrls: {
-    default: { http: ['https://testnet-rpc.integralayer.com'] },
-    public: { http: ['https://testnet-rpc.integralayer.com'] }
+    default: { http: ['https://ormos.integralayer.com/rpc'] },
+    public: { http: ['https://ormos.integralayer.com/rpc'] }
   },
   nativeCurrency: {
     name: 'IRL',
@@ -165,7 +166,7 @@ const testnetConfig = {
     decimals: 18
   },
   blockExplorers: {
-    default: { name: 'Ormos Explorer', url: 'https://testnet-explorer.integralayer.com' }
+    default: { name: 'Ormos Explorer', url: 'https://testnet.blockscout.integralayer.com' }
   }
 };
 ```
@@ -189,10 +190,10 @@ const testnetConfig = {
 | Field | Value |
 |-------|-------|
 | Network Name | Integra Testnet |
-| RPC URL | https://testnet-rpc.integralayer.com |
+| RPC URL | https://ormos.integralayer.com/rpc |
 | Chain ID | 26218 |
 | Currency Symbol | IRL |
-| Block Explorer | https://testnet-explorer.integralayer.com |
+| Block Explorer | https://testnet.blockscout.integralayer.com |
 
 ### Keplr - Mainnet
 
@@ -236,8 +237,8 @@ const keplrMainnetConfig = {
 const keplrTestnetConfig = {
   chainId: "integra-testnet-1",
   chainName: "Integra Testnet",
-  rpc: "https://testnet-rpc.integralayer.com:26657",
-  rest: "https://testnet-api.integralayer.com",
+  rpc: "https://ormos.integralayer.com/rpc:26657",
+  rest: "https://ormos.integralayer.com/rest",
   bip44: { coinType: 60 },
   bech32Config: {
     bech32PrefixAccAddr: "integra",
