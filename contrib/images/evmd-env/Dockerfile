@@ -1,3 +1,7 @@
+# WARNING: This Dockerfile builds the generic evmd example chain (chain-id: local-4221, token: atest).
+# It is NOT for Integralayer validators. For Integra validator Docker setup, use:
+#   https://github.com/Integra-layer/validator-skill
+#
 # Info on how to use this docker image can be found in DOCKER_README.md
 ARG IMG_TAG=latest
 

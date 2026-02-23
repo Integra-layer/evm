@@ -1,59 +1,68 @@
-# Example Cosmos EVM Chain
+# Integralayer Network
 
-This directory contains an example chain that uses the Cosmos EVM
-modules. It is based on the simapp implementation on the Cosmos SDK
-repository, which itself is a simplified version of a Cosmos SDK-based
-blockchain.
+This directory contains the Integralayer network implementation using Cosmos EVM
+modules. It builds the `intgd` binary for running Integralayer validator nodes.
 
-This chain implementation is used to demonstrate the integration of Cosmos EVM
-as well as to provide a chain object for testing purposes within the repository.
+For validator deployment guides, see: https://github.com/Integra-layer/validator-skill
 
 ## Config
 
-By default, this chain has the following configuration:
+| Option              | Value                                           |
+|---------------------|------------------------------------------------|
+| Binary              | `intgd`                                         |
+| Chain ID (Mainnet)  | `integra-1`                                     |
+| Chain ID (Testnet)  | `integra-testnet-1`                              |
+| EVM Chain ID        | `26217` (mainnet) / `26218` (testnet)            |
+| Custom Opcodes      | -                                               |
+| Default Token Pairs | 1 for the native token                          |
+| Denomination        | `airl` (display: IRL)                           |
+| EVM permissioning   | permissionless                                  |
+| Enabled Precompiles | all                                             |
 
-| Option              | Value                  |
-|---------------------|------------------------|
-| Binary              | `evmd`                 |
-| Chain ID            | `cosmos_262144-1`      |
-| Custom Opcodes      | -                      |
-| Default Token Pairs | 1 for the native token |
-| Denomination        | `atest`                |
-| EVM permissioning   | permissionless         |
-| Enabled Precompiles | all                    |
+> **Warning**: The default EVM chain ID after `intgd init` is `262144` (wrong). You must set it to `26217` (mainnet) or `26218` (testnet) in `app.toml` under `[evm]`.
 
-## Running The Chain
+## Building
 
-To run the example, execute the local node script found within this repository:
+```bash
+cd integra
+make install    # Installs intgd to $GOPATH/bin
+intgd version
+```
+
+> **Important**: Build from this `integra/` subdirectory, NOT the repository root. Running `make install` at the root builds the generic `evmd` binary.
+
+## Running a Local Dev Node
 
 ```bash
 ./local_node.sh [FLAGS]
 ```
 
-Available flags are:
+Available flags:
 
 - `-y`: Overwrite previous database
 - `-n`: Do **not** overwrite previous database
 - `--no-install`: Skip installation of the binary
 - `--remote-debugging`: Build a binary suitable for remote debugging
 
-## Connect to Wallet
+## Running a Validator (Docker)
 
-For the sake of this example, we'll be using Metamask:
+For production validator deployment, use the validator-skill repo:
 
-1. Use the following seed phrase when adding a new wallet:
-`gesture inject test cycle original hollow east ridge hen combine
-junk child bacon zero hope comfort vacuum milk pitch cage oppose
-unhappy lunar seat`
-2. On the top left of the Metamask extension, click the Network button.
-3. Click Add custom network from the bottom of the modal.
-4. Under Default RPC URL, add the RPC URL as http://localhost:8545. Ensure your chain is running.
-5. Once added, copy the rest of the settings shown in the below images.
+```bash
+git clone https://github.com/Integra-layer/validator-skill.git
+cd validator-skill
+docker compose -f docker-compose.testnet.yml up -d
+```
 
-![Button to select network](guide/networks.png "Networks Select")
-![Button to add network](guide/add_network.png "Networks Add")
-![RPC URL Settings](guide/rpc_url.png "RPC URL")
-![Overview of required settings](guide/settings.png "Settings Overview")
+See https://github.com/Integra-layer/validator-skill for full instructions.
+
+## Connect to Wallet (Local Dev)
+
+For local development with MetaMask:
+
+1. Add custom network with RPC URL `http://localhost:8545`
+2. EVM Chain ID: `26217` (mainnet) or `26218` (testnet)
+3. Token symbol: `IRL`
 
 ## Available Cosmos SDK Modules
 
