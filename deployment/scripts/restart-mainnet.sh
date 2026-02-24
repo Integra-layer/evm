@@ -75,7 +75,7 @@ reset_node() {
     
     # Step 2: Reset chain data
     echo "  → Resetting blockchain data..."
-    ssh "${SSH_USER}@${NODE_IP}" "intgd tendermint unsafe-reset-all --home /root/.intgd --keep-addr-book"
+    ssh "${SSH_USER}@${NODE_IP}" "intgd comet unsafe-reset-all --home /root/.intgd --keep-addr-book"
     
     # Step 3: Copy new genesis
     echo "  → Deploying new genesis.json..."

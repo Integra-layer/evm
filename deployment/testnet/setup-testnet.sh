@@ -314,9 +314,9 @@ echo ""
 echo -e "${YELLOW}[7/8] Configuring peers...${NC}"
 
 # Get node IDs
-NODE1_ID=$(ssh "${SSH_USER}@${NODE1_IP}" "intgd tendermint show-node-id --home ${HOME_DIR}")
-NODE2_ID=$(ssh "${SSH_USER}@${NODE2_IP}" "intgd tendermint show-node-id --home ${HOME_DIR}")
-NODE3_ID=$(ssh "${SSH_USER}@${NODE3_IP}" "intgd tendermint show-node-id --home ${HOME_DIR}")
+NODE1_ID=$(ssh "${SSH_USER}@${NODE1_IP}" "intgd comet show-node-id --home ${HOME_DIR}")
+NODE2_ID=$(ssh "${SSH_USER}@${NODE2_IP}" "intgd comet show-node-id --home ${HOME_DIR}")
+NODE3_ID=$(ssh "${SSH_USER}@${NODE3_IP}" "intgd comet show-node-id --home ${HOME_DIR}")
 
 echo "  Node IDs:"
 echo "    Node 1: ${NODE1_ID}"
