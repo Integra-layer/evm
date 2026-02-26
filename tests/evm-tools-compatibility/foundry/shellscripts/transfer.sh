@@ -24,13 +24,14 @@ echo "📦 Sending transfer($TO, $AMOUNT) to $CONTRACT"
 
 # 1) Send transaction with cast
 echo "💸 Sending transfer transaction:"
-echo "$ cast send \"$CONTRACT\" 'transfer(address,uint256)' \"$TO\" \"$AMOUNT\" --rpc-url \"$RPC_URL\" --private-key \"[HIDDEN]\" --chain-id \"$CHAIN_ID\" --json"
+echo "$ cast send \"$CONTRACT\" 'transfer(address,uint256)' \"$TO\" \"$AMOUNT\" --rpc-url \"$RPC_URL\" --private-key \"[HIDDEN]\" --chain-id \"$CHAIN_ID\" --legacy --json"
 RESPONSE=$(cast send \
 	"$CONTRACT" \
 	'transfer(address,uint256)' "$TO" "$AMOUNT" \
 	--rpc-url "$RPC_URL" \
 	--private-key "$PRIVATE_KEY" \
 	--chain-id "$CHAIN_ID" \
+	--legacy \
 	--json)
 
 TXHASH=$(echo "$RESPONSE" | jq -r '.hash // .transactionHash')

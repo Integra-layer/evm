@@ -16,13 +16,33 @@ You can run these tests with both `forge` and `cast` and compare the results sid
 - **Local node**: A running Cosmos-SDK / CometBFT chain exposing an Ethereum-compatible RPC endpoint at `$CUSTOM_RPC`.
 - **GNU Make** (optional) for convenience.
 
+## Network Configuration
+
+| Network | Chain ID | EVM RPC |
+|---------|----------|---------|
+| Local | `262144` | `http://127.0.0.1:8545` |
+| Testnet | `26218` | `https://testnet.integralayer.com/evm` |
+| Mainnet | `26217` | `https://mainnet.integralayer.com/evm` |
+
+Update the `.env` file to match your target network:
+
+```bash
+# For testnet:
+CHAIN_ID=26218
+CUSTOM_RPC=https://testnet.integralayer.com/evm
+
+# For mainnet:
+CHAIN_ID=26217
+CUSTOM_RPC=https://mainnet.integralayer.com/evm
+```
+
 ## Initial Setup
 
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/b-harvest/evm-tools-compatibility.git
-   cd evm-tools-compatibility/foundry
+   git clone https://github.com/Integra-layer/evm.git
+   cd evm/tests/evm-tools-compatibility/foundry
    ```
 
 2. **Install dependencies**
@@ -62,7 +82,7 @@ forge test \
 
 ### Query Network Info
 
-`case call`
+`cast call`
 
 ```bash
 ./shellscripts/get-network-info.sh
@@ -71,11 +91,12 @@ forge test \
 `forge script`
 
 ```bash
-source .env                                
+source .env
 forge script script/NetworkInfo.s.sol \
   --rpc-url $CUSTOM_RPC \
   --chain-id $CHAIN_ID \
-  --broadcast
+  --broadcast \
+  --legacy
 ```
 
 ### Deploy Contract
@@ -87,7 +108,8 @@ source .env
 forge script script/DeployERC20.s.sol \
   --rpc-url $CUSTOM_RPC \
   --broadcast \
-  --chain-id $CHAIN_ID
+  --chain-id $CHAIN_ID \
+  --legacy
 ```
 
 ### Read State
@@ -105,7 +127,8 @@ source .env
 forge script script/ReadState.s.sol:ReadState \
   --rpc-url $CUSTOM_RPC \
   --chain-id $CHAIN_ID \
-  --broadcast
+  --broadcast \
+  --legacy
 ```
 
 ### ERC20 Transfer
@@ -123,7 +146,8 @@ source .env
 forge script script/Transfer.s.sol:Transfer \
   --rpc-url $CUSTOM_RPC \
   --chain-id $CHAIN_ID \
-  --broadcast
+  --broadcast \
+  --legacy
 ```
 
 ### ERC20 Transfer Revert
@@ -142,12 +166,15 @@ source .env
 forge script script/TransferError.s.sol:TransferError \
   --rpc-url $CUSTOM_RPC \
   --chain-id $CHAIN_ID \
-  --broadcast
+  --broadcast \
+  --legacy
 ```
 
 ## Common Issues & Notes
 
-- **Import errors for forge-std or ds-test**:  
+- **EIP-1559 not fully supported**: Cosmos-EVM chains require the `--legacy` flag on all `forge script` and `cast send` commands. Without it, transactions will fail with gas estimation errors.
+
+- **Import errors for forge-std or ds-test**:
   Ensure `remappings.txt` exists and contains at least:
 
   ```text
@@ -156,4 +183,6 @@ forge script script/TransferError.s.sol:TransferError \
   @openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
   ```
 
-  Then restart your editor’s language server.
+  Then restart your editor's language server.
+
+- **Default chain ID is wrong**: `intgd init` sets the EVM chain ID to `262144`. Override it in `.env` — testnet is `26218`, mainnet is `26217`.

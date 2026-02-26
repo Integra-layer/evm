@@ -26,13 +26,14 @@ echo "🔄 Sending transfer exceeding balance..."
 
 # 1) Send via cast and capture output (suppress exit)
 echo "❌ Attempting transfer that should fail:"
-echo "$ cast send \"$CONTRACT\" 'transfer(address,uint256)' \"$RECIPIENT\" \"$AMOUNT\" --rpc-url \"$RPC_URL\" --private-key \"[HIDDEN]\" --chain-id \"$CHAIN_ID\" --json"
+echo "$ cast send \"$CONTRACT\" 'transfer(address,uint256)' \"$RECIPIENT\" \"$AMOUNT\" --rpc-url \"$RPC_URL\" --private-key \"[HIDDEN]\" --chain-id \"$CHAIN_ID\" --legacy --json"
 OUTPUT=$(cast send \
 	"$CONTRACT" \
 	'transfer(address,uint256)' "$RECIPIENT" "$AMOUNT" \
 	--rpc-url "$RPC_URL" \
 	--private-key "$PK" \
 	--chain-id "$CHAIN_ID" \
+	--legacy \
 	--json 2>&1 || true)
 
 # 2) Try parse JSON
